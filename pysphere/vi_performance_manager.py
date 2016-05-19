@@ -1,0 +1,423 @@
+#--
+# Copyright (c) 2012, Sebastian Tello, Alejandro Lozanoff
+# All rights reserved.
+
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+#   * Redistributions of source code must retain the above copyright notice,
+#     this list of conditions and the following disclaimer.
+#   * Redistributions in binary form must reproduce the above copyright notice,
+#     this list of conditions and the following disclaimer in the documentation
+#     and/or other materials provided with the distribution.
+#   * Neither the name of copyright holders nor the names of its contributors
+#     may be used to endorse or promote products derived from this software
+#     without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+#--
+
+from pysphere.resources import VimService_services as VI
+from pysphere.vi_property import VIProperty
+from pysphere.resources.vi_exception import VIException, VIApiException, \
+                    UnsupportedPerfIntervalError, FaultTypes
+import datetime
+
+class EntityStatistics:
+    def __init__(self, mor, counter_key, counter_name, counter_desc, group_name,
+                 group_desc, unit_name, unit_desc, instance_name, value,
+                 time_stamp):
+        self.mor = mor
+        self.counter_key = counter_key
+        self.counter = counter_name
+        self.description = counter_desc
+        self.group = group_name
+        self.group_description = group_desc
+        self.unit = unit_name
+        self.unit_description = unit_desc
+        self.instance = instance_name
+        self.value = value
+        self.time = time_stamp
+
+    def __str__(self):
+        return "MOR: %s\nCounter: %s (%s)\nGroup: %s\nDescription: %s\n" \
+               "Instance: %s\nValue: %s\nUnit: %s\nTime: %s" % (
+                                       self.mor, self.counter, self.counter_key, 
+                                       self.group_description, self.description,
+                                       self.instance, self.value,
+                                       self.unit_description, self.time)
+
+    def __repr__(self):
+        return"<%(mor)s:%(counter)s(%(counter_key)s):%(description)s" \
+              ":%(instance)s:%(value)s:%(unit)s:%(time)s>" % self.__dict__
+
+class Intervals:
+    CURRENT = None
+    PAST_DAY = 1
+    PAST_WEEK = 2
+    PAST_MONTH = 3
+    PAST_YEAR = 4
+
+class PerformanceManager:
+    INTERVALS = Intervals
+    
+    def __init__(self, server, mor):
+        self._server = server
+        self._mor = mor
+        self._properties = VIProperty(server, mor)
+        
+        try:
+            self._supported_intervals = dict([(i.key, i.samplingPeriod) 
+            for i in self._properties.historicalInterval if i.enabled])
+        except:
+            #not historical intervals supported
+            self._supported_intervals = {}
+
+    def _get_counter_info(self, counter_id, counter_obj):
+        """Return name, description, group, and unit info of a give counter_id.
+        counter_id [int]: id of the counter.
+        counter_obj [list]: An array consisting of performance
+            counter information for the specified counterIds."""
+        for c in counter_obj:
+            if c.Key == counter_id:
+                return (c.NameInfo.Key, c.NameInfo.Label, c.GroupInfo.Key, 
+                        c.GroupInfo.Label, c.UnitInfo.Key, c.UnitInfo.Label)
+        return None, None, None, None, None, None
+
+    def _get_metric_id(self, metrics, counter_obj, counter_ids):
+        """ Get the metric ID from a metric name.
+        metrics [list]: An array of performance metrics with a
+            performance counter ID and an instance name.
+        counter_obj [list]: An array consisting of performance
+            counter information for the specified counterIds.
+        """
+        metric_list = []
+        for metric in metrics:
+            if metric.CounterId in counter_ids:
+                if metric not in metric_list:
+                    metric_list.append(metric)
+        return metric_list
+
+    def get_entity_counters(self, entity, interval=None):
+        """Returns a dictionary of available counters. The dictionary key
+        is the counter name, and value is the corresponding counter id
+        interval: None (default) for current real-time statistics, or the
+            interval id for historical statistics see IDs available in
+            PerformanceManager.INTERVALS"""
+        sampling_period = self._check_and_get_interval_by_id(entity, interval)
+        metrics = self.query_available_perf_metric(entity,
+                                                   interval_id=sampling_period)
+        if not metrics:
+            return {}
+        counter_obj = self.query_perf_counter([metric.CounterId 
+                                               for metric in metrics])
+        return dict([("%s.%s" % (c.GroupInfo.Key, c.NameInfo.Key), c.Key)
+                     for c in counter_obj]) 
+        
+
+    def get_entity_statistic(self, entity, counters, interval=None,
+                             composite=False):
+        """ Get the give statistics from a given managed object
+        entity [mor]: ManagedObject Reference of the managed object from were
+            statistics are to be retrieved.
+        counter_id [list of integers or strings]: Counter names or ids 
+                                                 to retrieve stats for.
+        interval: None (default) for current real-time statistics, or the
+            interval id for historical statistics see IDs available in
+            PerformanceManager.INTERVALS
+        composite [bool] (default False) If true, uses QueryPerfComposite
+            instead of QueryPerf.
+        """
+        sampling_period = self._check_and_get_interval_by_id(entity, interval)
+        if not isinstance(counters, list):
+            counters = [counters]
+            
+        if any([isinstance(i, basestring) for i in counters]):
+            avail_counters = self.get_entity_counters(entity, interval)
+            new_list = []
+            for c in counters:
+                if isinstance(c, int):
+                    new_list.append(c)
+                else:
+                    counter_id = avail_counters.get(c)
+                    if counter_id:
+                        new_list.append(counter_id)
+            counters = new_list
+                    
+        metrics = self.query_available_perf_metric(entity,
+                                                   interval_id=sampling_period)
+        counter_obj = self.query_perf_counter(counters)
+        metric = self._get_metric_id(metrics, counter_obj, counters)
+        if not metric:
+            return []
+        query = self.query_perf(entity, metric_id=metric, max_sample=1,
+                               interval_id=sampling_period, composite=composite)
+
+        statistics = []
+        if not query:
+            return statistics
+        
+        stats = []
+        if composite:
+            if hasattr(query, "Entity"):
+                stats.extend(query.Entity.Value)
+            if hasattr(query, "ChildEntity"):
+                for item in query.ChildEntity:
+                    stats.extend(item.Value)
+        else:
+            if hasattr(query[0], "Value"):
+                stats = query[0].Value
+        for stat in stats:
+            cname, cdesc, gname, gdesc, uname, udesc = self._get_counter_info(
+                                                  stat.Id.CounterId,counter_obj)
+
+            instance_name = str(stat.Id.Instance)
+            stat_value = str(stat.Value[0])
+            date_now = datetime.datetime.utcnow()
+            statistics.append(EntityStatistics(entity, stat.Id.CounterId, cname,
+                                               cdesc, gname, gdesc, uname, 
+                                               udesc, instance_name, stat_value,
+                                               date_now))
+        return statistics
+
+    def _check_and_get_interval_by_id(self, entity, interval):
+        """Given an interval ID (or None for refresh rate) verifies if
+        the entity or the system supports that interval. Returns the sampling
+        period if so, or raises an Exception if not supported"""
+        summary = self.query_perf_provider_summary(entity)
+        if not interval: #must support current (real time) statistics
+            if not summary.CurrentSupported:
+                
+                #Here the following exception should be raised, however,
+                #some objects as datastores can retrieve metrics even though
+                #current metrics are not supported, and refreshRate isn't set.
+                #So if thi is the case, I'll just return None.
+                #For more details see:
+                #http://communities.vmware.com/message/1623870#1623870
+                return None
+                raise UnsupportedPerfIntervalError(
+                                  "Current statistics not supported for this "
+                                  "entity. Try using an historical interval " 
+                                  "id instead.", FaultTypes.NOT_SUPPORTED)
+            return summary.RefreshRate
+        else:
+            if not summary.SummarySupported:
+                raise UnsupportedPerfIntervalError(
+                                  "Summary statistics not supported for this "
+                                  "entity. Try using current interlval instead " 
+                                  "(interval=None).", FaultTypes.NOT_SUPPORTED)
+            if interval not in self._supported_intervals:
+                raise UnsupportedPerfIntervalError(
+                                  "The Interval ID provided is not supported "
+                                  "on this server.", FaultTypes.NOT_SUPPORTED)
+                
+            return self._supported_intervals.get(interval)
+        
+        
+    def query_available_perf_metric(self, entity, begin_time=None,
+                                                  end_time=None,
+                                                  interval_id=None):
+        """Retrieves available performance metrics for the specified
+        ManagedObject between the optional beginTime and endTime. These are the
+        performance statistics that are available for the given time interval.
+        entity [mor]: The ManagedObject for which available performance metrics
+            are queried.
+        begin_time [time tuple]: The time from which available performance 
+            metrics are gathered. Corresponds to server time. When the beginTime
+            is omitted, the returned metrics start from the first available
+            metric in the system.
+        end_time [time tuple]: The time up to which available performance
+            metrics are gathered. Corresponds to server time. When the endTime
+            is omitted, the returned result includes up to the most recent
+            metric value.
+        interval_id [int]: Specify a particular interval that the query is
+            interested in. Acceptable intervals are the refreshRate returned in
+            QueryProviderSummary, which is used to retrieve available metrics
+            for real-time performance statistics, or one of the historical
+            intervals, which are used to retrieve available metrics for
+            historical performance statistics. If interval is not specified,
+            system returns available metrics for historical statistics.
+        """
+        if begin_time:
+            begin_time[6] = 0
+            
+        if end_time:
+            end_time[6] = 0
+        try:
+            request = VI.QueryAvailablePerfMetricRequestMsg()
+            mor_pm = request.new__this(self._mor)
+            mor_pm.set_attribute_type(self._mor.get_attribute_type())
+            request.set_element__this(mor_pm)
+
+            mor_entity = request.new_entity(entity)
+            mor_entity.set_attribute_type(entity.get_attribute_type())
+            request.set_element_entity(mor_entity)
+
+            if begin_time:
+                request.set_element_beginTime(begin_time)
+            if end_time:
+                request.set_element_endTime(end_time)              
+            if interval_id:
+                request.set_element_intervalId(interval_id)
+
+            do_perf_metric_id = self._server._proxy.QueryAvailablePerfMetric(
+                                                             request)._returnval
+            return do_perf_metric_id
+
+        except (VI.ZSI.FaultException), e:
+            raise VIApiException(e)
+
+    def query_perf_provider_summary(self, entity):
+        """Returns a ProviderSummary object for a ManagedObject for which 
+        performance statistics can be queried. Also indicates whether current or
+        summary statistics are supported. If the input managed entity is not a 
+        performance provider, an InvalidArgument exception is thrown.
+        entity [mor]: The ManagedObject for which available performance metrics
+        are queried.
+        """
+
+        if not entity:
+            raise VIException("No Entity specified.",FaultTypes.PARAMETER_ERROR)
+
+        try:
+            request = VI.QueryPerfProviderSummaryRequestMsg()
+            mor_qpps = request.new__this(self._mor)
+            mor_qpps.set_attribute_type(self._mor.get_attribute_type())
+            request.set_element__this(mor_qpps)
+
+            qpps_entity = request.new_entity(entity)
+            qpps_entity.set_attribute_type(entity.get_attribute_type())
+            request.set_element_entity(qpps_entity)
+
+            qpps = self._server._proxy.QueryPerfProviderSummary(
+                                                             request)._returnval
+            return qpps
+
+        except (VI.ZSI.FaultException), e:
+            raise VIApiException(e)
+
+    def query_perf_counter(self, counter_id):
+        """Retrieves counter information for the list of counter IDs passed in.
+        counter_id [list]: list of integers containing the counter IDs.
+        """
+
+        if counter_id:
+            if not isinstance(counter_id, list):
+                raise VIException("counter_id must be a list",
+                                  FaultTypes.PARAMETER_ERROR)
+        else:
+            raise VIException("No counter_id specified.",
+                              FaultTypes.PARAMETER_ERROR)
+
+        try:
+            request = VI.QueryPerfCounterRequestMsg()
+            mor_qpc = request.new__this(self._mor)
+            mor_qpc.set_attribute_type(self._mor.get_attribute_type())
+            request.set_element__this(mor_qpc)
+
+            request.set_element_counterId(counter_id)
+
+            qpc = self._server._proxy.QueryPerfCounter(request)._returnval
+            return qpc
+
+        except (VI.ZSI.FaultException), e:
+            raise VIApiException(e)
+
+    def query_perf(self, entity, format='normal', interval_id=None, 
+                   max_sample=None, metric_id=None, start_time=None,
+                   composite=False):
+        """Returns performance statistics for the entity. The client can limit
+        the returned information by specifying a list of metrics and a suggested
+        sample interval ID. Server accepts either the refreshRate or one of the
+        historical intervals as input interval.
+        entity [mor]: The ManagedObject managed object whose performance
+            statistics are being queried.
+        format [string]: The format to be used while returning the statistics.
+        interval_id [int]: The interval (samplingPeriod) in seconds for which
+            performance statistics are queried. There is a set of intervals for
+            historical statistics. Refer HistoricalInterval for more more 
+            information about these intervals. To retrieve the greatest 
+            available level of detail, the provider's refreshRate may be used 
+            for this property.
+        max_sample [int]: The maximum number of samples to be returned from 
+            server. The number of samples returned are more recent samples in 
+            the time range specified. For example, if the user specifies a 
+            maxSample of 1, but not a given time range, the most recent sample 
+            collected is returned. This parameter can be used only when querying
+            for real-time statistics by setting the intervalId parameter to the
+            provider's refreshRate.
+            This argument is ignored for historical statistics.
+        metric_id: [PerfMetricId]: The performance metrics to be retrieved.
+        start_time [timetuple]: The time from which statistics are to be
+            retrieved. Corresponds to server time. When startTime is omitted,
+            the returned metrics start from the first available metric in the
+            system. When a startTime is specified, the returned samples do not
+            include the sample at startTime.
+        composite: [bool]: If true requests QueryPerfComposite method instead of
+            QuerPerf.
+        """
+
+        if interval_id:
+            if not isinstance(interval_id, int) or interval_id < 0:
+                raise VIException("interval_id must be a positive integer",
+                                  FaultTypes.PARAMETER_ERROR)
+        if max_sample:
+            if not isinstance(max_sample, int) or max_sample < 0:
+                raise VIException("max_sample must be a positive integer",
+                                  FaultTypes.PARAMETER_ERROR)
+        if metric_id:
+            if not isinstance(metric_id, list):
+                raise VIException("metric_id must be a list of integers",
+                                  FaultTypes.PARAMETER_ERROR)     
+        try:
+            if composite:
+                request = VI.QueryPerfCompositeRequestMsg()
+            else:
+                request = VI.QueryPerfRequestMsg()
+            mor_qp = request.new__this(self._mor)
+            mor_qp.set_attribute_type(self._mor.get_attribute_type())
+            request.set_element__this(mor_qp)
+
+            query_spec = request.new_querySpec()
+
+            spec_entity = query_spec.new_entity(entity)
+            spec_entity.set_attribute_type(entity.get_attribute_type())
+            query_spec.set_element_entity(spec_entity)
+
+            if format != "normal":
+                if format == "csv":
+                    query_spec.set_element_format(format)
+                else:
+                    raise VIException("accepted formats are 'normal' and 'csv'",
+                                  FaultTypes.PARAMETER_ERROR)
+            if interval_id:
+                query_spec.set_element_intervalId(interval_id)
+            if max_sample:
+                query_spec.set_element_maxSample(max_sample)
+            if metric_id:
+                query_spec.set_element_metricId(metric_id)
+            if start_time:
+                query_spec.set_element_startTime(start_time)
+            
+            if composite:
+                request.set_element_querySpec(query_spec)
+                query_perf = self._server._proxy.QueryPerfComposite(
+                                                           request)._returnval
+            else:
+                request.set_element_querySpec([query_spec])
+                query_perf = self._server._proxy.QueryPerf(request)._returnval
+
+            return query_perf
+
+        except (VI.ZSI.FaultException), e:
+            raise VIApiException(e)
