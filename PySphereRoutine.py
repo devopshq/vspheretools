@@ -4,7 +4,7 @@
 
 
 # This module realize some functions for work with vSphere and virtual machines.
-# Home wiki-page: https://github.com/devopshq/vspheretools/wiki/vSphereTools
+# Home wiki-page: https://github.com/devopshq/vspheretools/wiki/vSphereTools-Instruction-(ru)
 
 
 import os
