@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="DevOps-runner: vSphereTools - Stop VM">
+  <description>Stop virtual machine using vSphereTools. WIKI: https://github.com/devopshq/vspheretools/wiki/vSphereTools-Instruction-(ru)</description>
+  <settings>
+    <parameters>
+      <param name="_execute_step_0_if" value="TRUE" spec="text description='Execute or skip step depends on TRUE or FALSE value (case insensitive)' display='normal' label='EXECUTE step if*:' validationMode='not_empty'" />
+      <param name="VC_SERVER" value="" spec="text description='Please, define vSphere cluster, e.g. vcenter-01.example.com' display='normal' label='VC_SERVER:' validationMode='not_empty'" />
+      <param name="VC_LOGIN" value="" spec="text description='Please, define vSphere user login' display='normal' label='VC_LOGIN:' validationMode='not_empty'" />
+      <param name="VC_PASSWORD" value="" spec="text description='Please, define vSphere user password' display='normal' label='VC_PASSWORD:' validationMode='not_empty'" />
+      <param name="VM_NAME" value="" spec="text description='Please, type full virtual machine name' display='normal' label='VM_NAME:' validationMode='not_empty'" />
+    </parameters>
+    <build-runners>
+      <runner name="Stopping VM..." type="simpleRunner">
+        <parameters>
+          <param name="script.content"><![CDATA[%Python.2% PySphereRoutine.py --not-skip-run "%_execute_step_0_if%" --server %VC_SERVER% --login "%VC_LOGIN%" --password "%VC_PASSWORD%" --name "%VM_NAME%" --stop]]></param>
+          <param name="teamcity.build.workingDir" value="%default_devops_tools_path_local%/vspheretools" />
+          <param name="teamcity.step.mode" value="default" />
+          <param name="use.custom.script" value="true" />
+        </parameters>
+      </runner>
+    </build-runners>
+    <requirements />
+  </settings>
+</meta-runner>
+

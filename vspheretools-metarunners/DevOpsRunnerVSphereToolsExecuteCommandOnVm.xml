@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="DevOps-runner: vSphereTools - Execute command on VM">
+  <description>Execute program with given parameters. WIKI: https://github.com/devopshq/vspheretools/wiki/vSphereTools-Instruction-(ru)</description>
+  <settings>
+    <parameters>
+      <param name="_execute_step_0_if" value="TRUE" spec="text description='Execute or skip step depends on TRUE or FALSE value (case insensitive)' display='normal' label='EXECUTE step if*:' validationMode='not_empty'" />
+      <param name="VC_SERVER" value="" spec="text description='Please, define vSphere cluster, e.g. vcenter-01.example.com' display='normal' label='VC_SERVER:' validationMode='not_empty'" />
+      <param name="VC_LOGIN" value="" spec="text description='Please, define vSphere user login' display='normal' label='VC_LOGIN:' validationMode='not_empty'" />
+      <param name="VC_PASSWORD" value="" spec="text description='Please, define vSphere user password' display='normal' label='VC_PASSWORD:' validationMode='not_empty'" />
+      <param name="VM_NAME" value="" spec="text description='Please, type full virtual machine name' display='normal' label='VM_NAME:' validationMode='not_empty'" />
+      <param name="VM_GUEST_LOGIN" value="" spec="text description='Please, define OS user login' display='normal' label='VM_GUEST_LOGIN:' validationMode='not_empty'" />
+      <param name="VM_GUEST_PASSWORD" value="" spec="text description='Please, define OS user password' display='normal' label='VM_GUEST_PASSWORD:' validationMode='not_empty'" />
+      <param name="program_path" value="" spec="text description='Please, define full path to executable file on virtual machine, e.g. C:\Windows\System32\cmd.exe' display='normal' label='Program path:' validationMode='not_empty'" />
+      <param name="args_list" value="" spec="text description='If you need, define additional command-line arguments with comma separated, e.g. arg1, arg2, or /T:Green /C echo %aaa% &amp; echo %bbb%' display='normal' label='Command-line arguments:' validationMode='any'" />
+      <param name="env_list" value="" spec="text description='If you need, define additional env variables with comma separated, e.g. aaa:10, bbb:20, ...' display='normal' label='Environment variables:' validationMode='any'" />
+      <param name="cwd_path" value="" spec="text description='If you need, define additional path to program working directory, e.g. C:\Windows\System32\' display='normal' label='Working directory:' validationMode='any'" />
+      <param name="wait_end" value="TRUE" spec="select data_1='TRUE' data_2='FALSE' description='If True then metaranner wait for the end of process, copy stderr, stdout and return exit code. Otherwise - only ran process.' display='normal' label='Wait for the end:' validationMode='not_empty'" />
+    </parameters>
+    <build-runners>
+      <runner name="Executing command on VM..." type="simpleRunner">
+        <parameters>
+          <param name="script.content"><![CDATA[%Python.2% PySphereRoutine.py --not-skip-run "%_execute_step_0_if%" --server %VC_SERVER% --login "%VC_LOGIN%" --password "%VC_PASSWORD%" --name "%VM_NAME%" -gl "%VM_GUEST_LOGIN%" -gp "%VM_GUEST_PASSWORD%" --execute program="%program_path%" args="%args_list%" env="%env_list%" cwd="%cwd_path%" pythonbin="%python2_bin%" wait=%wait_end%"]]></param>
+          <param name="teamcity.build.workingDir" value="%default_devops_tools_path_local%/vspheretools" />
+          <param name="teamcity.step.mode" value="default" />
+          <param name="use.custom.script" value="true" />
+        </parameters>
+      </runner>
+    </build-runners>
+    <requirements />
+  </settings>
+</meta-runner>
+
