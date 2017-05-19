@@ -22,7 +22,7 @@
     - [Как добавить vspheretools-metarunners](#Chapter_3_1)
 - [Работа через API](#Chapter_4)
     - [Глобальные переменные](#Chapter_4_1)
-    - [Методы](#Chapter_4_1)
+    - [Методы](#Chapter_4_2)
 - [Типичные проблемы и способы их устранения](#Chapter_5)
 
 
@@ -279,9 +279,9 @@
 
 **1. Если вы видите в логах ошибки вида:**
 
-`PySphereRoutine.py       [Line:89] ERROR     [2015-08-28 16:48:44,490] Can not connect to vSphere! server = vcenter-01.example.com,`
-`VIApiException: [InvalidLoginFault]: Cannot complete login due to an incorrect user name or password,`
-`pysphere.resources.vi_exception.VIApiException: [GuestOperationsUnavailableFault]: The guest operations agent could not be contacted.`
+    PySphereRoutine.py       [Line:89] ERROR     [2015-08-28 16:48:44,490] Can not connect to vSphere! server = vcenter-01.example.com,
+    VIApiException: [InvalidLoginFault]: Cannot complete login due to an incorrect user name or password,
+    pysphere.resources.vi_exception.VIApiException: [GuestOperationsUnavailableFault]: The guest operations agent could not be contacted.
 
 и прочие, связанные с авторизацией, то проверьте, что вы правильно указываете логин и пароль: доменный логин должен иметь вид: domain\login, например, .\administartor - учетка локального админа, пароль и логин не должны содержать спецсимволов или экранироваться кавычками.
 
@@ -289,7 +289,7 @@
 
 Если вы видите в логах ошибку похожую на:
 
-`exitCode = sphere.ExecuteProgramOnVM(**dict(kw.split('=') for kw in args.execute))`
-`ValueError: dictionary update sequence element #3 has length 4; 2 is required`
+    exitCode = sphere.ExecuteProgramOnVM(**dict(kw.split('=') for kw in args.execute))
+    ValueError: dictionary update sequence element #3 has length 4; 2 is required
 
-то проверьте правильность заполнения поля "Command-line arguments". Запятыми разделяются только отдельные переменные! Длинные строковые значения одной переменной разделять запятой не надо. 
+то проверьте правильность заполнения поля "Command-line arguments". Запятыми разделяются только отдельные переменные! Длинные строковые значения одной переменной разделять запятой не надо.
