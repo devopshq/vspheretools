@@ -4,17 +4,10 @@
 
 
 # This module realize some functions for work with vSphere and virtual machines.
-# Home wiki-page: https://github.com/devopshq/vspheretools/wiki/vSphereTools-Instruction-(ru)
+# Home wiki-page: http://devopshq.github.io/vspheretools/
 
 
 import os
-import sys
-
-# ssl compatibilities:
-if sys.platform is not 'win32':
-    if sys.version_info >= (2, 7, 9):
-        import ssl
-        ssl._create_default_https_context = ssl._create_unverified_context
 
 import argparse
 import traceback
@@ -25,15 +18,45 @@ from pysphere import VIServer
 from Logger import *
 
 
+# ssl compatibilities:
+if sys.platform is not 'win32':
+    if sys.version_info >= (2, 7, 9):
+        import ssl
+        ssl._create_default_https_context = ssl._create_unverified_context
+
+
 # Global variables:
 VC_SERVER = r""  # e.g. vcenter-01.example.com
-VC_LOGIN = r""
-VC_PASSWORD = r""
-VM_NAME = r""
-VM_GUEST_LOGIN = r""
-VM_GUEST_PASSWORD = r""
-VM_CLONES_DIR = "Clones"  # dir for cloning vm
+VC_LOGIN = r""  # login to Sphere
+VC_PASSWORD = r""  # password to Sphere
+VM_NAME = r""  # name of virtual machine
+VM_GUEST_LOGIN = r""  # login to VM guest OS
+VM_GUEST_PASSWORD = r""  # password to VM guest
+VM_CLONES_DIR = "Clones"  # directory for cloning vm
 OP_TIMEOUT = 300  # operations timeout in seconds
+
+
+def Version(onlyPrint=False):
+    """
+    Return current version of FuzzyClassificator build
+    """
+    import pkg_resources  # part of standart setuptools
+
+    try:
+        version = pkg_resources.get_distribution('vspheretools').version
+
+    except Exception:
+        if onlyPrint:
+            LOGGER.setLevel(logging.CRITICAL)
+            print('unknown')
+
+        return 'unknown'
+
+    if onlyPrint:
+        LOGGER.setLevel(logging.CRITICAL)
+        print(version)
+
+    return version
 
 
 def ParseArgsMain():
@@ -242,7 +265,6 @@ class Sphere():
         """
         Read and return list of all VM snapshots.
         """
-        current = None
         snapshots = []
         try:
             current = self.vmInstance.get_current_snapshot_name()
@@ -582,7 +604,7 @@ class Sphere():
 
             except:
                 trace = traceback.format_exc()
-                if not 'FileAlreadyExistsFault' in trace:
+                if 'FileAlreadyExistsFault' not in trace:
                     LOGGER.error(traceback.format_exc())
                     LOGGER.error('An error occured while directory "{}" created inside virtual machine "{}"!'.format(dirPath, VM_NAME))
 
