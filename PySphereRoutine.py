@@ -814,7 +814,19 @@ finally:
         return returnCode
 
 
-if __name__ == "__main__":
+def Main():
+    """
+    Main entry point. 
+    """
+    global VC_SERVER
+    global VC_LOGIN
+    global VC_PASSWORD
+    global VM_NAME
+    global VM_GUEST_LOGIN
+    global VM_GUEST_PASSWORD
+    global VM_CLONES_DIR
+    global OP_TIMEOUT
+
     args = ParseArgsMain()  # get and parse command-line parameters
 
     if args.not_skip_run:
@@ -965,3 +977,7 @@ if __name__ == "__main__":
             LOGGER.warning('Please, select command!')
 
     sys.exit(exitCode)
+
+
+if __name__ == "__main__":
+    Main()
