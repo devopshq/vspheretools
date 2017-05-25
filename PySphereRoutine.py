@@ -682,8 +682,8 @@ class Sphere():
             program - string path to executable file, e.g. r"C:\Windows\System32\cmd.exe",
             args - comma-separated strings with arguments to the program, e.g. r"/T:Green /C echo %aaa% & echo %bbb%",
             env - comma-separated strings with environment variables, e.g. r"aaa:10, bbb:20",
-            cwd - string path to working directory, e.g. r"C:\Windows\System32\",
-            pythonbin - path to python binary on VM,
+            cwd - string path to working directory, e.g. r'C:\Windows\System32\',
+            pythonbin - path to python binary on VM, e.g. r'/python32/python'
             wait - wait for process end and then return stderr, stdout and exit code.
         """
         returnCode = 0  # process return code
@@ -727,7 +727,12 @@ class Sphere():
             remoteLogFile = os.path.join(os.path.dirname(program[0]), 'vm_process.log')  # log file on VM
             remoteScriptFile = os.path.join(os.path.dirname(program[0]), os.path.basename(scriptFile))  # wrapper on VM
 
-            script = r"""# This is script wrapper using for run user-command on VM.
+            script = r"""# -*- coding: utf-8 -*-
+#
+# Author: Timur Gilmullin, tim55667757@gmail.com
+# This is script wrapper using for run user-command on VM side.
+
+
 import os, sys, subprocess, traceback
 
 returnCode = 0
