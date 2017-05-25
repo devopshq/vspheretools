@@ -59,7 +59,7 @@
 
 Либо, если инструмент установлен через pip, то просто наберите в консоли:
 
-    VSphereTools [options] [command]
+    vspheretools [options] [command]
 
 Допускается указание множества опций и одна команда, которую нужно выполнить на Сфере.
 
@@ -128,94 +128,94 @@
 
 Получить текущий статус ВМ:
 
-    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --status
+    vspheretools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --status
 
 Запустить ВМ:
 
-    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --start
+    vspheretools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --start
 
 Запустить ВМ и дожидаться загрузки OS в течение 5 минут:
 
-    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --timeout 300 --start-wait
+    vspheretools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --timeout 300 --start-wait
 
 Остановить ВМ:
 
-    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --stop
+    vspheretools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --stop
  
 Получить список снапшотов:
 
-    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --snapshots
+    vspheretools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --snapshots
 
 Создать снапшот:
 
-    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --create-snapshot name="Snapshot name" rewrite=True fail-if-exist=False
+    vspheretools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --create-snapshot name="Snapshot name" rewrite=True fail-if-exist=False
 
 Откатить ВМ на текущий (активный) снапшот:
 
-    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --revert-to-current-snapshot
+    vspheretools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --revert-to-current-snapshot
  
 Откатить ВМ на снапшот по его имени:
 
-    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --revert-to-snapshot <full_snapshot_name>
+    vspheretools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --revert-to-snapshot <full_snapshot_name>
 
 Получить список свойств ВМ:
 
-    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --properties
+    vspheretools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --properties
 
 Получить текущий ip-адрес ВМ с таймаутом данной операции в 10 секунд:
 
-    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --timeout 10 --get-ip
+    vspheretools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --timeout 10 --get-ip
  
 Установить в TeamCity значение параметра vm_ip равное текущему ip-адресу ВМ, с таймаутом данной операции в 10 секунд:
 
-    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --timeout 10 --set-ip-into-teamcity-param vm_ip
+    vspheretools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --timeout 10 --set-ip-into-teamcity-param vm_ip
   
 Сделать новый клон ВМ в указанную директорию:
 
-    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --clone-dir Clones --clone new_clone_name
+    vspheretools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --clone-dir Clones --clone new_clone_name
  
 Удалить ВМ. ВНИМАНИЕ! Крайне осторожно используйте эту опцию! У пользователя должны быть ограниченные права на удаление только из конкретных каталогов на Сфере!
 
-    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --delete
+    vspheretools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --delete
  
 Скопировать локальный файл на ВМ с его перезаписью:
 
-    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> -gl <guest-login> -gp <guest-password> --upload-file <source_file> <destination_file> True
+    vspheretools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> -gl <guest-login> -gp <guest-password> --upload-file <source_file> <destination_file> True
 
 Скопировать файл из ВМ и положить по локальному пути без перезаписи (по умолчанию):
 
-    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> -gl <guest-login> -gp <guest-password> --download-file <source_file> <destination_file>
+    vspheretools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> -gl <guest-login> -gp <guest-password> --download-file <source_file> <destination_file>
  
 Создать директорию и все промежуточные поддиректории (по умолчанию):
 
-    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> -gl <guest-login> -gp <guest-password> --mkdir <dir_path>
+    vspheretools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> -gl <guest-login> -gp <guest-password> --mkdir <dir_path>
  
 Запустить консоль Windows с параметрами:
 
-    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> -gl <guest-login> -gp <guest-password> --execute program="C:\Windows\System32\cmd.exe" args="/T:Green /C echo %aaa% & echo %bbb%" env="aaa:10, bbb:20" cwd="C:\Windows\System32" pythonbin="c:\python27\python.exe" wait=True
+    vspheretools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> -gl <guest-login> -gp <guest-password> --execute program="C:\Windows\System32\cmd.exe" args="/T:Green /C echo %aaa% & echo %bbb%" env="aaa:10, bbb:20" cwd="C:\Windows\System32" pythonbin="c:\python27\python.exe" wait=True
 
 
 # Работа c vspheretools через метараннеры в TeamCity <a name="Chapter_3"></a>
 
 Для работы со Сферой в TemCity можно добавить следующие метараннеры:
 
-* DevOps-runner: vSphereTools - Show VM status - отображает в логе информацию о статусе ВМ.
-* DevOps-runner: vSphereTools - Start VM - запускает указанную ВМ.
-* DevOps-runner: vSphereTools - Start VM and waiting until guest OS started - запускает указанную ВМ и ожидает загрузки OS в течение указанного времени.
-* DevOps-runner: vSphereTools - Stop VM - останавливает указанную ВМ.
-* DevOps-runner: vSphereTools - Show VM snapshots - выводит список доступных снапшотов для ВМ.
-* DevOps-runner: vSphereTools - Create VM snapshot - создаёт снапшот для ВМ.
-* DevOps-runner: vSphereTools - Revert VM to current snapshot - откатывает ВМ на текущий (активный) снапшот.
-* DevOps-runner: vSphereTools - Revert VM to named snapshot - откатывает ВМ на указанный снапшот. Нужно задать полное имя снапшота. 
-* DevOps-runner: vSphereTools - Show VM properties - выводит список свойств ВМ.
-* DevOps-runner: vSphereTools - Show VM ip-address - получает и выводит текущий ip-адрес ВМ, если он есть.
-* DevOps-runner: vSphereTools - Set VM ip-address into TC parameter - получает текущий ip-адрес ВМ, если он есть, и затем устанавливает его значение в указанную переменную для конфигурации TeamCity. Переменная должна существовать в конфигурации.
-* DevOps-runner: vSphereTools - Clone VM into directory - клонирует ВМ в указанный каталог на Сфере, куда должен быть доступ на запись для пользователя Сферы.
-* DevOps-runner: vSphereTools - Delete VM - удаляет ВМ со Сферы. ВНИМАНИЕ! Крайне осторожно используйте этот метараннер! У пользователя должны быть ограниченные права на удаление и только из конкретных каталогов на Сфере! Добейтесь это через отдел IT.
-* DevOps-runner: vSphereTools - Upload file to VM - копирует локальный файл на указанную ВМ на Сфере, по указанному пути.
-* DevOps-runner: vSphereTools - Download file from VM - копирует файл из ВМ на Сфере, по указанному локальному пути.
-* DevOps-runner: vSphereTools - Create directory on VM - создает директорию по указанному пути на ВМ и все промежуточные поддиректории.
-* DevOps-runner: vSphereTools - Execute command on VM - запускает указанную программу на ВМ с возможностью ожидания её окончания и получения консольных логов и exit-кода.
+* DevOps-runner: vspheretools - Show VM status - отображает в логе информацию о статусе ВМ.
+* DevOps-runner: vspheretools - Start VM - запускает указанную ВМ.
+* DevOps-runner: vspheretools - Start VM and waiting until guest OS started - запускает указанную ВМ и ожидает загрузки OS в течение указанного времени.
+* DevOps-runner: vspheretools - Stop VM - останавливает указанную ВМ.
+* DevOps-runner: vspheretools - Show VM snapshots - выводит список доступных снапшотов для ВМ.
+* DevOps-runner: vspheretools - Create VM snapshot - создаёт снапшот для ВМ.
+* DevOps-runner: vspheretools - Revert VM to current snapshot - откатывает ВМ на текущий (активный) снапшот.
+* DevOps-runner: vspheretools - Revert VM to named snapshot - откатывает ВМ на указанный снапшот. Нужно задать полное имя снапшота. 
+* DevOps-runner: vspheretools - Show VM properties - выводит список свойств ВМ.
+* DevOps-runner: vspheretools - Show VM ip-address - получает и выводит текущий ip-адрес ВМ, если он есть.
+* DevOps-runner: vspheretools - Set VM ip-address into TC parameter - получает текущий ip-адрес ВМ, если он есть, и затем устанавливает его значение в указанную переменную для конфигурации TeamCity. Переменная должна существовать в конфигурации.
+* DevOps-runner: vspheretools - Clone VM into directory - клонирует ВМ в указанный каталог на Сфере, куда должен быть доступ на запись для пользователя Сферы.
+* DevOps-runner: vspheretools - Delete VM - удаляет ВМ со Сферы. ВНИМАНИЕ! Крайне осторожно используйте этот метараннер! У пользователя должны быть ограниченные права на удаление и только из конкретных каталогов на Сфере! Добейтесь это через отдел IT.
+* DevOps-runner: vspheretools - Upload file to VM - копирует локальный файл на указанную ВМ на Сфере, по указанному пути.
+* DevOps-runner: vspheretools - Download file from VM - копирует файл из ВМ на Сфере, по указанному локальному пути.
+* DevOps-runner: vspheretools - Create directory on VM - создает директорию по указанному пути на ВМ и все промежуточные поддиректории.
+* DevOps-runner: vspheretools - Execute command on VM - запускает указанную программу на ВМ с возможностью ожидания её окончания и получения консольных логов и exit-кода.
 
 
 ## Как добавить vspheretools-metarunners <a name="Chapter_3_1"></a>
