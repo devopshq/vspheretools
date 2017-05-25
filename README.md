@@ -14,6 +14,7 @@
 ***Содержание:***
 - [Общие сведения](#Chapter_1)
     - [Требования к окружению](#Chapter_1_1)
+    - [Установка](#Chapter_1_2)
 - [Работа в консоли](#Chapter_2)
     - [Опции](#Chapter_2_1)
     - [Команды](#Chapter_2_2)
@@ -27,7 +28,7 @@
 
 
 # Общие сведения <a name="Chapter_1"></a>
-**vSphereTools** - это набор скриптов от DevOpsHQ для поддержки работы с vSphere и виртуальными машинами (ВМ) на ней, в основе которых лежит библиотека pysphere. Эти скрипты были написаны для целей интеграции vSphere с TeamCity на уровне шагов конфигураций, реализованных через мета-раннеры. Также возможно использование инструментов vSphereTools из консоли или импортируя нужные модули и методы в свои проекты. Для работы vSphereTools из консоли используются пайтоновские скрипты PySphereRoutine.py.
+**vSphereTools** - это набор скриптов от DevOpsHQ для поддержки работы с vSphere и виртуальными машинами (ВМ) на ней, в основе которых лежит библиотека pysphere. Эти скрипты были написаны для целей интеграции vSphere с TeamCity на уровне шагов конфигураций, реализованных через мета-раннеры. Также возможно использование инструментов vSphereTools из консоли или импортируя нужные модули и методы в свои проекты. Для работы vSphereTools из консоли используются пайтоновские скрипты VSphereTools.py.
 
 Как работает инструмент? Смотрите на схеме ниже.
 
@@ -42,14 +43,27 @@
 4. На машине, где выполняется запуск скриптов, установлен Python 2*, версий 2.7 или старше. 
 
 
+## Установка <a name="Chapter_1_2"></a>
+
+1. Необходимо скачать vSphereTools из гит-репозитория https://github.com/devopshq/vspheretools и распаковать в любой каталог.
+2. Либо вы можете установить инструмент через pip:
+
+    pip install vspheretools
+
+
 # Работа в консоли <a name="Chapter_2"></a>
-Необходимо скачать vSphereTools из гит-репозитория, открыть консоль и перейти в каталог vSphereTools. 
 
-Использование:
+Использование (если вы не устанавливали инструмент через pip, а просто скачали и распаковали):
 
-    python PySphereRoutine.py [options] [command]`
+    python VSphereTools.py [options] [command]
+
+Либо, если инструмент установлен через pip, то просто наберите в консоли:
+
+    VSphereTools [options] [command]
 
 Допускается указание множества опций и одна команда, которую нужно выполнить на Сфере.
+
+В примерах далее будем считать, что vspheretools установлен через pip и опускать ключевое слово python.
 
 
 ## Опции <a name="Chapter_2_1"></a>
@@ -110,75 +124,75 @@
 
 ## Примеры использования <a name="Chapter_2_3"></a>
 
- Если во входных параметрах используются пробелы, то задавайте их значения в двойных кавычках: "имя ВМ с пробелом"
+Если во входных параметрах используются пробелы, то задавайте их значения в двойных кавычках: "имя ВМ с пробелом"
 
 Получить текущий статус ВМ:
 
-    python PySphereRoutine.py --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --status
+    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --status
 
 Запустить ВМ:
 
-    python PySphereRoutine.py --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --start
+    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --start
 
 Запустить ВМ и дожидаться загрузки OS в течение 5 минут:
 
-    python PySphereRoutine.py --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --timeout 300 --start-wait
+    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --timeout 300 --start-wait
 
 Остановить ВМ:
 
-    python PySphereRoutine.py --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --stop
+    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --stop
  
 Получить список снапшотов:
 
-    python PySphereRoutine.py --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --snapshots
+    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --snapshots
 
 Создать снапшот:
 
-    python PySphereRoutine.py --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --create-snapshot name="Snapshot name" rewrite=True fail-if-exist=False
+    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --create-snapshot name="Snapshot name" rewrite=True fail-if-exist=False
 
 Откатить ВМ на текущий (активный) снапшот:
 
-    python PySphereRoutine.py --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --revert-to-current-snapshot
+    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --revert-to-current-snapshot
  
 Откатить ВМ на снапшот по его имени:
 
-    python PySphereRoutine.py --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --revert-to-snapshot <full_snapshot_name>
+    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --revert-to-snapshot <full_snapshot_name>
 
 Получить список свойств ВМ:
 
-    python PySphereRoutine.py --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --properties
+    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --properties
 
 Получить текущий ip-адрес ВМ с таймаутом данной операции в 10 секунд:
 
-    python PySphereRoutine.py --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --timeout 10 --get-ip
+    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --timeout 10 --get-ip
  
 Установить в TeamCity значение параметра vm_ip равное текущему ip-адресу ВМ, с таймаутом данной операции в 10 секунд:
 
-    python PySphereRoutine.py --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --timeout 10 --set-ip-into-teamcity-param vm_ip
+    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --timeout 10 --set-ip-into-teamcity-param vm_ip
   
 Сделать новый клон ВМ в указанную директорию:
 
-    python PySphereRoutine.py --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --clone-dir Clones --clone new_clone_name
+    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --clone-dir Clones --clone new_clone_name
  
 Удалить ВМ. ВНИМАНИЕ! Крайне осторожно используйте эту опцию! У пользователя должны быть ограниченные права на удаление только из конкретных каталогов на Сфере!
 
-    python PySphereRoutine.py --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --delete
+    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> --delete
  
 Скопировать локальный файл на ВМ с его перезаписью:
 
-    python PySphereRoutine.py --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> -gl <guest-login> -gp <guest-password> --upload-file <source_file> <destination_file> True
+    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> -gl <guest-login> -gp <guest-password> --upload-file <source_file> <destination_file> True
 
 Скопировать файл из ВМ и положить по локальному пути без перезаписи (по умолчанию):
 
-    python PySphereRoutine.py --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> -gl <guest-login> -gp <guest-password> --download-file <source_file> <destination_file>
+    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> -gl <guest-login> -gp <guest-password> --download-file <source_file> <destination_file>
  
 Создать директорию и все промежуточные поддиректории (по умолчанию):
 
-    python PySphereRoutine.py --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> -gl <guest-login> -gp <guest-password> --mkdir <dir_path>
+    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> -gl <guest-login> -gp <guest-password> --mkdir <dir_path>
  
 Запустить консоль Windows с параметрами:
 
-    python PySphereRoutine.py --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> -gl <guest-login> -gp <guest-password> --execute program="C:\Windows\System32\cmd.exe" args="/T:Green /C echo %aaa% & echo %bbb%" env="aaa:10, bbb:20" cwd="C:\Windows\System32" pythonbin="c:\python27\python.exe" wait=True
+    VSphereTools --server vcenter-01.example.com --login <Domain_account> --password <userpass> --name <full_VM_name> -gl <guest-login> -gp <guest-password> --execute program="C:\Windows\System32\cmd.exe" args="/T:Green /C echo %aaa% & echo %bbb%" env="aaa:10, bbb:20" cwd="C:\Windows\System32" pythonbin="c:\python27\python.exe" wait=True
 
 
 # Работа c vspheretools через метараннеры в TeamCity <a name="Chapter_3"></a>
@@ -214,7 +228,7 @@
 
 # Работа через API <a name="Chapter_4"></a>
 
-Нужно импортировать модуль PySphereRoutine.py. При использовании модуля нужно определить основные константы:
+Нужно импортировать модуль VSphereTools.py. При использовании модуля нужно определить основные константы:
 
 
 ## Глобальные переменные <a name="Chapter_4_1"></a>
@@ -279,7 +293,7 @@
 
 **1. Если вы видите в логах ошибки вида:**
 
-    PySphereRoutine.py       [Line:89] ERROR     [2015-08-28 16:48:44,490] Can not connect to vSphere! server = vcenter-01.example.com,
+    VSphereTools.py       [Line:89] ERROR     [2015-08-28 16:48:44,490] Can not connect to vSphere! server = vcenter-01.example.com,
     VIApiException: [InvalidLoginFault]: Cannot complete login due to an incorrect user name or password,
     pysphere.resources.vi_exception.VIApiException: [GuestOperationsUnavailableFault]: The guest operations agent could not be contacted.
 
