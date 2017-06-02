@@ -1,4 +1,3 @@
-#--
 # Copyright (c) 2012, Sebastian Tello
 # All rights reserved.
 
@@ -24,8 +23,7 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-#--
+
 
 import time
 
@@ -33,12 +31,13 @@ from pysphere import VIException, FaultTypes, VIApiException
 from pysphere.vi_property import VIProperty
 from pysphere.resources import VimService_services as VI
 
+
 class VITask:
 
-    STATE_ERROR   =   'error'
-    STATE_QUEUED  =   'queued'
-    STATE_RUNNING =   'running'
-    STATE_SUCCESS =   'success'
+    STATE_ERROR = 'error'
+    STATE_QUEUED = 'queued'
+    STATE_RUNNING = 'running'
+    STATE_SUCCESS = 'success'
 
     def __init__(self, mor, server):
         self._mor = mor
@@ -80,12 +79,11 @@ class VITask:
     def get_error_message(self):
         """If the task finished with error, returns the related message"""
         self.__poll_task_info()
-        if hasattr(self.info, "error") and hasattr(self.info.error, 
-                                                   "localizedMessage"):
+        if hasattr(self.info, "error") and hasattr(self.info.error, "localizedMessage"):
             return self.info.error.localizedMessage
 
     def get_result(self):
-        "Returns the task result (if any) if it has successfully finished"
+        """Returns the task result (if any) if it has successfully finished"""
         self.__poll_task_info()
         if hasattr(self.info, "result"):
             return self.info.result
@@ -107,7 +105,7 @@ class VITask:
             
             self._server._proxy.CancelTask(request)
             
-        except (VI.ZSI.FaultException), e:
+        except VI.ZSI.FaultException as e:
             raise VIApiException(e)
         
     def __poll_task_info(self, retries=3, interval=2):
@@ -115,7 +113,9 @@ class VITask:
             try:
                 self.info = VIProperty(self._server, self._mor).info
                 return True
-            except Exception, e:
-                if i == retries -1:
+
+            except Exception as e:
+                if i == retries - 1:
                     raise e
+
             time.sleep(interval)
