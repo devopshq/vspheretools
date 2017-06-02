@@ -1,4 +1,3 @@
-#--
 # Copyright (c) 2012, Sebastian Tello
 # All rights reserved.
 
@@ -24,13 +23,13 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-#--
+
 
 class VIException(Exception):
     def __init__(self, msg, fault):
         self.message = str(msg)
         self.fault = str(fault)
+
     def __str__(self):
         return "[%s]: %s" % (self.fault, self.message)
 
@@ -39,23 +38,28 @@ class VIApiException(VIException):
     def __init__(self, e):
         try:
             message = e.fault.args[1]
+
         except:
             message = str(e)
+
         try:
             fault = e.fault.detail[0].typecode.pname
+
         except:
             fault = 'Undefined'
 
         super(self.__class__, self).__init__(message, fault)
 
+
 class UnsupportedPerfIntervalError(VIException):
     pass
 
+
 class FaultTypes:
-    PARAMETER_ERROR    = 'Parameter Error'
-    OBJECT_NOT_FOUND   = 'Object Not Found'
-    NOT_CONNECTED      = 'Not Connected'
-    TIME_OUT           = 'Operation Timed Out'
-    TASK_ERROR         = 'Task Error'
-    NOT_SUPPORTED      = 'Operation Not Supported'
-    INVALID_OPERATION  = 'Invalid Operation'
+    PARAMETER_ERROR = 'Parameter Error'
+    OBJECT_NOT_FOUND = 'Object Not Found'
+    NOT_CONNECTED = 'Not Connected'
+    TIME_OUT = 'Operation Timed Out'
+    TASK_ERROR = 'Task Error'
+    NOT_SUPPORTED = 'Operation Not Supported'
+    INVALID_OPERATION = 'Invalid Operation'

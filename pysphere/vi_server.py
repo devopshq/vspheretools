@@ -1,4 +1,3 @@
-#--
 # Copyright (c) 2012, Sebastian Tello
 # All rights reserved.
 
@@ -24,8 +23,7 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-#--
+
 
 import sys
 
@@ -37,6 +35,7 @@ from pysphere.vi_performance_manager import PerformanceManager
 from pysphere.vi_task_history_collector import VITaskHistoryCollector
 from pysphere.vi_mor import VIMor, MORTypes
 from pysphere.vi_task import VITask
+
 
 class VIServer:
 
@@ -63,11 +62,10 @@ class VIServer:
         timeout for sockets, in python 2.5 you'll  have to use 
         socket.setdefaulttimeout(secs) to change the global setting.
         """
-
         self.__user = user
         self.__password = password
-        #Generate server's URL
-        if not isinstance(host, basestring):
+        # Generate server's URL
+        if not isinstance(host, str):
             raise VIException("'host' should be a string with the ESX/VC url."
                              ,FaultTypes.PARAMETER_ERROR)
 
@@ -93,21 +91,19 @@ class VIServer:
             for header, value in self.__initial_headers.iteritems():
                 self._proxy.binding.AddHeader(header, value)
                 
-            #get service content from service instance
+            # get service content from service instance
             request = VI.RetrieveServiceContentRequestMsg()
             mor_service_instance = request.new__this('ServiceInstance')
             mor_service_instance.set_attribute_type(MORTypes.ServiceInstance)
             request.set_element__this(mor_service_instance)
-            self._do_service_content = self._proxy.RetrieveServiceContent(
-                                                             request)._returnval
+            self._do_service_content = self._proxy.RetrieveServiceContent(request)._returnval
             self.__server_type = self._do_service_content.About.Name
             self.__api_version = self._do_service_content.About.ApiVersion
             self.__api_type = self._do_service_content.About.ApiType
 
-            #login
+            # login
             request = VI.LoginRequestMsg()
-            mor_session_manager = request.new__this(
-                                        self._do_service_content.SessionManager)
+            mor_session_manager = request.new__this(self._do_service_content.SessionManager)
             mor_session_manager.set_attribute_type(MORTypes.SessionManager)
             request.set_element__this(mor_session_manager)
             request.set_element_userName(user)
@@ -115,7 +111,7 @@ class VIServer:
             self.__session = self._proxy.Login(request)._returnval
             self.__logged = True
 
-        except (VI.ZSI.FaultException), e:
+        except VI.ZSI.FaultException as e:
             raise VIApiException(e)
 
     def keep_session_alive(self):
@@ -149,7 +145,8 @@ class VIServer:
                 mor_session_manager.set_attribute_type(MORTypes.SessionManager)
                 request.set_element__this(mor_session_manager)
                 self._proxy.Logout(request)
-            except (VI.ZSI.FaultException), e:
+
+            except VI.ZSI.FaultException as e:
                 raise VIApiException(e)
 
     def get_performance_manager(self):
@@ -179,7 +176,6 @@ class VIServer:
         """
         return self._get_managed_objects(MORTypes.HostSystem, from_mor)
     
-
     def get_datastores(self, from_mor=None):
         """
         Returns a dictionary of the existing datastores. Keys are
@@ -227,7 +223,7 @@ class VIServer:
                                       from_node=from_mor,
                                       obj_type=MORTypes.ResourcePool)
         for oc in prop:
-            this_rp = {}
+            this_rp = dict()
             this_rp["children"] = []
             this_rp["mor"] = oc.get_element_obj()
             mor_str = str(this_rp["mor"])
@@ -285,7 +281,8 @@ class VIServer:
                 else:
                     if vm:
                         return VIVirtualMachine(self, vm)
-        except (VI.ZSI.FaultException), e:
+
+        except VI.ZSI.FaultException as e:
             raise VIApiException(e)
 
         raise VIException("Could not find a VM with path '%s'" % path, 
@@ -317,7 +314,8 @@ class VIServer:
                 for k,v in vms.iteritems():
                     if v == name:
                         return VIVirtualMachine(self, k)
-        except (VI.ZSI.FaultException), e:
+
+        except VI.ZSI.FaultException as e:
             raise VIApiException(e)
 
         raise VIException("Could not find a VM named '%s'" % name, 
@@ -369,7 +367,7 @@ class VIServer:
             if not 'config.files.vmPathName' in property_filter:
                 property_filter.insert(0, 'config.files.vmPathName')
             
-            #Root MOR filters
+            # Root MOR filters
             ret = []
             nodes = [None]
             if resource_pool and VIMor.is_mor(resource_pool):
@@ -419,7 +417,7 @@ class VIServer:
                         ret.append(ppath)
             return ret
 
-        except (VI.ZSI.FaultException), e:
+        except VI.ZSI.FaultException as e:
             raise VIApiException(e)
 
     def acquire_clone_ticket(self):
@@ -440,7 +438,8 @@ class VIServer:
             _this.set_attribute_type(MORTypes.SessionManager)
             request.set_element__this(_this)
             return self._proxy.AcquireCloneTicket(request)._returnval
-        except (VI.ZSI.FaultException), e:
+
+        except VI.ZSI.FaultException as e:
             raise VIApiException(e)
 
     def _get_object_properties(self, mor, property_names=[], get_all=False):
@@ -486,7 +485,7 @@ class VIServer:
             if ret and isinstance(ret, list):
                 return ret[0]
 
-        except (VI.ZSI.FaultException), e:
+        except VI.ZSI.FaultException as e:
             raise VIApiException(e)
 
     def _get_object_properties_bulk(self, mor_list, properties):
@@ -545,12 +544,11 @@ class VIServer:
 
             return request_call(request)
 
-        except (VI.ZSI.FaultException), e:
+        except VI.ZSI.FaultException as e:
             raise VIApiException(e)                 
 
-
     def _retrieve_properties_traversal(self, property_names=[],
-                                      from_node=None, obj_type='ManagedEntity'):
+                                       from_node=None, obj_type='ManagedEntity'):
         """Uses VI API's property collector to retrieve the properties defined
         in @property_names of Managed Objects of type @obj_type ('ManagedEntity'
         by default). Starts the search from the managed object reference
@@ -569,9 +567,7 @@ class VIServer:
             
             request, request_call = self._retrieve_property_request()
 
-
-            _this = request.new__this(
-                                     self._do_service_content.PropertyCollector)
+            _this = request.new__this(self._do_service_content.PropertyCollector)
             _this.set_attribute_type(MORTypes.PropertyCollector)
 
             request.set_element__this(_this)
@@ -590,7 +586,7 @@ class VIServer:
             do_ObjectSpec_objSet.set_element_obj(mor_obj)
             do_ObjectSpec_objSet.set_element_skip(False)
 
-            #Recurse through all ResourcePools
+            # Recurse through all ResourcePools
             rp_to_rp = VI.ns0.TraversalSpec_Def('rpToRp').pyclass()
             rp_to_rp.set_element_name('rpToRp')
             rp_to_rp.set_element_type(MORTypes.ResourcePool)
@@ -609,7 +605,7 @@ class VIServer:
 
             rp_to_rp.set_element_selectSet(spec_array_resource_pool)
 
-            #Traversal through resource pool branch
+            # Traversal through resource pool branch
             cr_to_rp = VI.ns0.TraversalSpec_Def('crToRp').pyclass()
             cr_to_rp.set_element_name('crToRp')
             cr_to_rp.set_element_type(MORTypes.ComputeResource)
@@ -621,14 +617,14 @@ class VIServer:
             spec_array_computer_resource[1].set_element_name('rpToVm');
             cr_to_rp.set_element_selectSet(spec_array_computer_resource)
 
-            #Traversal through host branch
+            # Traversal through host branch
             cr_to_h = VI.ns0.TraversalSpec_Def('crToH').pyclass()
             cr_to_h.set_element_name('crToH')
             cr_to_h.set_element_type(MORTypes.ComputeResource)
             cr_to_h.set_element_path('host')
             cr_to_h.set_element_skip(False)
 
-            #Traversal through hostFolder branch
+            # Traversal through hostFolder branch
             dc_to_hf = VI.ns0.TraversalSpec_Def('dcToHf').pyclass()
             dc_to_hf.set_element_name('dcToHf')
             dc_to_hf.set_element_type(MORTypes.Datacenter)
@@ -638,7 +634,7 @@ class VIServer:
             spec_array_datacenter_host[0].set_element_name('visitFolders')
             dc_to_hf.set_element_selectSet(spec_array_datacenter_host)
 
-            #Traversal through vmFolder branch
+            # Traversal through vmFolder branch
             dc_to_vmf = VI.ns0.TraversalSpec_Def('dcToVmf').pyclass()
             dc_to_vmf.set_element_name('dcToVmf')
             dc_to_vmf.set_element_type(MORTypes.Datacenter)
@@ -648,7 +644,7 @@ class VIServer:
             spec_array_datacenter_vm[0].set_element_name('visitFolders')
             dc_to_vmf.set_element_selectSet(spec_array_datacenter_vm)
 
-            #Traversal through datastore branch
+            # Traversal through datastore branch
             dc_to_ds = VI.ns0.TraversalSpec_Def('dcToDs').pyclass()
             dc_to_ds.set_element_name('dcToDs')
             dc_to_ds.set_element_type(MORTypes.Datacenter)
@@ -658,7 +654,7 @@ class VIServer:
             spec_array_datacenter_ds[0].set_element_name('visitFolders')
             dc_to_ds.set_element_selectSet(spec_array_datacenter_ds)
 
-            #Recurse through all hosts
+            # Recurse through all hosts
             h_to_vm = VI.ns0.TraversalSpec_Def('hToVm').pyclass()
             h_to_vm.set_element_name('hToVm')
             h_to_vm.set_element_type(MORTypes.HostSystem)
@@ -668,7 +664,7 @@ class VIServer:
             spec_array_host_vm[0].set_element_name('visitFolders')
             h_to_vm.set_element_selectSet(spec_array_host_vm)
 
-            #Recurse through all datastores
+            # Recurse through all datastores
             ds_to_vm = VI.ns0.TraversalSpec_Def('dsToVm').pyclass()
             ds_to_vm.set_element_name('dsToVm')
             ds_to_vm.set_element_type(MORTypes.Datastore)
@@ -678,7 +674,7 @@ class VIServer:
             spec_array_datastore_vm[0].set_element_name('visitFolders')
             ds_to_vm.set_element_selectSet(spec_array_datastore_vm)
 
-            #Recurse through the folders
+            # Recurse through the folders
             visit_folders = VI.ns0.TraversalSpec_Def('visitFolders').pyclass()
             visit_folders.set_element_name('visitFolders')
             visit_folders.set_element_type(MORTypes.Folder)
@@ -704,7 +700,7 @@ class VIServer:
             spec_array_visit_folders[8].set_element_name('rpToVm')
             visit_folders.set_element_selectSet(spec_array_visit_folders)
 
-            #Add all of them here
+            # Add all of them here
             spec_array = [visit_folders, dc_to_vmf, dc_to_ds, dc_to_hf, cr_to_h,
                           cr_to_rp, rp_to_rp, h_to_vm, ds_to_vm, rp_to_vm]
 
@@ -717,9 +713,8 @@ class VIServer:
 
             return request_call(request)
 
-        except (VI.ZSI.FaultException), e:
+        except VI.ZSI.FaultException as e:
                 raise VIApiException(e)
-
 
     def _retrieve_property_request(self):
         """Returns a base request object an call request method pointer for
@@ -750,11 +745,11 @@ class VIServer:
             return ret            
 
         if self.__api_version >= "4.1":
-            #RetrieveProperties is deprecated (but supported) in sdk 4.1.
-            #skd 4.1 adds RetrievePropertiesEx with an extra 'options' arg
+            # RetrieveProperties is deprecated (but supported) in sdk 4.1.
+            # skd 4.1 adds RetrievePropertiesEx with an extra 'options' arg
 
             request = VI.RetrievePropertiesExRequestMsg()
-            #set options
+            # set options
             options = request.new_options()
             request.set_element_options(options)
             call_pointer = call_retrieve_properties_ex
@@ -769,7 +764,7 @@ class VIServer:
         """Sets a HTTP header to be sent with the SOAP requests.
         E.g. for impersonation of a particular client.
         Both name and value should be strings."""
-        if not (isinstance(name, basestring) and isinstance(value, basestring)):
+        if not (isinstance(name, str) and isinstance(value, str)):
             return
         
         if not self.__logged:
@@ -794,43 +789,9 @@ class VIServer:
         if not content: return {}
         try:
             return dict([(o.Obj, o.PropSet[0].Val) for o in content])
-        except VI.ZSI.FaultException, e:
+
+        except VI.ZSI.FaultException as e:
             raise VIApiException(e)
-    
-    #---- DEPRECATED METHODS ----#    
-            
-    def _get_clusters(self, from_cache=True):
-        """DEPRECATED: use get_clusters instead."""
-        import warnings
-        from exceptions import DeprecationWarning
-        warnings.warn("method '_get_clusters' is DEPRECATED use "\
-                      "'get_clusters' instead",
-                      DeprecationWarning)
-        
-        ret = self.get_clusters()
-        return dict([(v,k) for k,v in ret.iteritems()])
-    
-    def _get_datacenters(self, from_cache=True):
-        """DEPRECATED: use get_datacenters instead."""
-        import warnings
-        from exceptions import DeprecationWarning
-        warnings.warn("method '_get_datacenters' is DEPRECATED use "\
-                      "'get_datacenters' instead",
-                      DeprecationWarning)
-
-        ret = self.get_datacenters()
-        return dict([(v,k) for k,v in ret.iteritems()])
-    
-    def _get_resource_pools(self, from_cache=True):
-        """DEPRECATED: use get_resource_pools instead."""
-        import warnings
-        from exceptions import DeprecationWarning
-        warnings.warn("method '_get_resource_pools' is DEPRECATED use "\
-                      "'get_resource_pools' instead",
-                      DeprecationWarning)
-
-        ret = self.get_resource_pools()
-        return dict([(v,k) for k,v in ret.iteritems()])     
 
     def delete_vm_by_path(self, path, remove_files=True):
         """
@@ -838,19 +799,17 @@ class VIServer:
         @path is the path to VM.
         @remove_files - if True (default) will delete VM files from datastore.
         """
-        #TODO: there is an issue with wait_for_state for UnregisterVM
         statusLine = ''
         success = False
 
         if not self.__logged:
-            raise VIException("Must call 'connect' before invoking this method",
-                            FaultTypes.NOT_CONNECTED)
+            raise VIException("Must call 'connect' before invoking this method", FaultTypes.NOT_CONNECTED)
         try:
-            #Get VM
+            # Get VM
             vm = self.get_vm_by_path(path)
 
             if remove_files:
-                #Invoke Destroy_Task
+                # Invoke Destroy_Task
                 request = VI.Destroy_TaskRequestMsg()
 
                 _this = request.new__this(vm._mor)
@@ -859,7 +818,7 @@ class VIServer:
                 ret = self._proxy.Destroy_Task(request)._returnval
                 task = VITask(ret, self)
                 
-                #Wait for the task to finish
+                # Wait for the task to finish
                 status = task.wait_for_state([task.STATE_SUCCESS, task.STATE_ERROR])
 
                 if status == task.STATE_SUCCESS:
@@ -871,7 +830,7 @@ class VIServer:
                     success = False
 
             elif not remove_files:
-                #Invoke UnregisterVMRequestMsg 
+                # Invoke UnregisterVMRequestMsg
                 request = VI.UnregisterVMRequestMsg()
 
                 _this = request.new__this(vm._mor)
@@ -883,7 +842,7 @@ class VIServer:
                 statusLine = "VM successfully unregistered (files still on datastore)"
                 success = True
 
-        except (VI.ZSI.FaultException), e:
+        except VI.ZSI.FaultException as e:
             raise VIApiException(e)
 
         finally:
@@ -895,19 +854,17 @@ class VIServer:
         @name is the VM name.
         @remove_files - if True (default) will delete VM files from datastore.
         """
-        #TODO: there is an issue with wait_for_state for UnregisterVM
         statusLine = ''
         success = False
 
         if not self.__logged:
-            raise VIException("Must call 'connect' before invoking this method",
-                            FaultTypes.NOT_CONNECTED)
+            raise VIException("Must call 'connect' before invoking this method", FaultTypes.NOT_CONNECTED)
         try:
-            #Get VM
+            # Get VM
             vm = self.get_vm_by_name(name)
 
             if remove_files:
-                #Invoke Destroy_Task
+                # Invoke Destroy_Task
                 request = VI.Destroy_TaskRequestMsg()
 
                 _this = request.new__this(vm._mor)
@@ -916,7 +873,7 @@ class VIServer:
                 ret = self._proxy.Destroy_Task(request)._returnval
                 task = VITask(ret, self)
                 
-                #Wait for the task to finish
+                # Wait for the task to finish
                 status = task.wait_for_state([task.STATE_SUCCESS, task.STATE_ERROR])
 
                 if status == task.STATE_SUCCESS:
@@ -928,7 +885,7 @@ class VIServer:
                     success = False
 
             else:
-                #Invoke UnregisterVMRequestMsg 
+                # Invoke UnregisterVMRequestMsg
                 request = VI.UnregisterVMRequestMsg()
 
                 _this = request.new__this(vm._mor)
@@ -940,7 +897,7 @@ class VIServer:
                 statusLine = "VM successfully unregistered (files still on datastore)"
                 success = True
 
-        except (VI.ZSI.FaultException), e:
+        except VI.ZSI.FaultException as e:
             raise VIApiException(e)
 
         finally:
