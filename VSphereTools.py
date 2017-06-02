@@ -25,17 +25,6 @@ if sys.platform is not 'win32':
         ssl._create_default_https_context = ssl._create_unverified_context
 
 
-# Global variables:
-VC_SERVER = r""  # e.g. vcenter-01.example.com
-VC_LOGIN = r""  # login to Sphere
-VC_PASSWORD = r""  # password to Sphere
-VM_NAME = r""  # name of virtual machine
-VM_GUEST_LOGIN = r""  # login to VM guest OS
-VM_GUEST_PASSWORD = r""  # password to VM guest
-VM_CLONES_DIR = "Clones"  # directory for cloning vm
-OP_TIMEOUT = 300  # operations timeout in seconds
-
-
 def Version(onlyPrint=False):
     """
     Return current version of FuzzyClassificator build
@@ -59,14 +48,31 @@ def Version(onlyPrint=False):
     return version
 
 
+# ----------------------------------------------------------------------------------------------------------------------
+# Global variables:
+VC_SERVER = r""  # e.g. vcenter-01.example.com
+VC_LOGIN = r""  # login to Sphere
+VC_PASSWORD = r""  # password to Sphere
+VM_NAME = r""  # name of virtual machine
+VM_GUEST_LOGIN = r""  # login to VM guest OS
+VM_GUEST_PASSWORD = r""  # password to VM guest
+VM_CLONES_DIR = "Clones"  # directory for cloning vm
+OP_TIMEOUT = 300  # operations timeout in seconds
+__version__ = Version()  # set version of current vSphereTools build
+# ----------------------------------------------------------------------------------------------------------------------
+
+
 def ParseArgsMain():
     """
     Function get and parse command line keys.
     """
     parser = argparse.ArgumentParser()  # command-line string parser
 
-    parser.description = 'This program realize some helper functions for work with vSphere and virtual machines.'
-    parser.epilog = 'PySphereRoutine using Python 2*'
+    parser.description = 'vSphereTools version: {}. vSphereTools is a set of scripts from DevOpsHQ to support working with vSphere and virtual machines (VMs) on it, which are based on the pysphere library.'.format(__version__)
+    parser.epilog = 'See examples on GitHub: http://devopshq.github.io/vspheretools/'
+    parser.usage = 'vspheretools [options] [command]'
+
+    parser.add_argument('-v', '--version', action='store_true', help='Show current version of vSphereTools.')
 
     # --- server options:
     parser.add_argument('-s', '--server', type=str, help='main vSphere Server Cluster, e.g. vcenter-01.example.com.')
@@ -104,7 +110,7 @@ def ParseArgsMain():
     parser.add_argument('--download-file', type=str, nargs='+', help='Download file from virtual machine with True to overwrite local file. Example: --download-file srcFile dstFile True')
 
     parser.add_argument('--mkdir', type=str, nargs='+', help='Creating directory and all sub-directory in given path with True to create sub-dirs. Example: --mkdir dir_path True')
-    parser.add_argument('--execute', type=str, nargs='+', help='Execute program on guest OS with parameters. Example: --execute program="C:\Windows\System32\cmd.exe" args="/T:Green /C echo %aaa% & echo %bbb%" env="aaa:10, bbb:20" cwd="C:\Windows\System32" pythonbin="c:\python27\python.exe" wait=True')
+    parser.add_argument('--execute', type=str, nargs='+', help=r'Execute program on guest OS with parameters. Example: --execute program="C:\Windows\System32\cmd.exe" args="/T:Green /C echo %%aaa%% & echo %%bbb%%" env="aaa:10, bbb:20" cwd="C:\Windows\System32" pythonbin="c:\python27\python.exe" wait=True')
 
     parser.add_argument('--not-skip-run', type=str, help='This is parameter for TeamCity support. Scripts executed if "TRUE". Scripts skipped if "FALSE". Otherwise exception raised.')
 
@@ -828,6 +834,10 @@ def Main():
     global OP_TIMEOUT
 
     args = ParseArgsMain()  # get and parse command-line parameters
+
+    if args.version:
+        Version(onlyPrint=True)  # Show current version of vSphereTools
+        sys.exit(0)
 
     if args.not_skip_run:
         if args.not_skip_run == "TRUE":
