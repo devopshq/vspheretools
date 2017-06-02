@@ -3,15 +3,7 @@
 [![vspheretools code quality](https://api.codacy.com/project/badge/Grade/185f7c8a13c84f88bf8b93280e457ffc)](https://www.codacy.com/app/tim55667757/vspheretools/dashboard)
 
 
-# How to use vspheretools-metarunners
-* Install (or copy) xml metarunners on your TeamCity admin page: https://[teamcity_server]/admin/editProject.html?projectId=_Root&tab=metaRunner (Administration - Root project - Meta-Runners)
-* Create new VCS from vspheretools project: https://github.com/devopshq/vspheretools
-* Attach new VCS to your TeamCity project and set up checkout rules: 
-+:.=>%default_devops_tools_path_local%/vspheretools
-* Create variable default_devops_tools_path_local in your TeamCity project and set value, e.g. "devops-tools". It is local path for devops-tools repository.
-
-
-***Содержание:***
+***Index:***
 - [Общие сведения](#Chapter_1)
     - [Требования к окружению](#Chapter_1_1)
     - [Установка](#Chapter_1_2)
@@ -218,12 +210,13 @@
 * DevOps-runner: vspheretools - Execute command on VM - запускает указанную программу на ВМ с возможностью ожидания её окончания и получения консольных логов и exit-кода.
 
 
-## Как добавить vspheretools-metarunners <a name="Chapter_3_1"></a>
-* Загрузите xml-метараннеры в вашей админке TeamCity: https://[teamcity_server]/admin/editProject.html?projectId=_Root&tab=metaRunner (Administration - Root project - Meta-Runners)
-* Создайте новую VCS в вашем проекте и добавьте в неё vspheretools: https://github.com/devopshq/vspheretools
-* Добавьте VCS к вашему TeamCity-проекту и настройте checkout rules:
+## How to add vspheretools-metarunners <a name="Chapter_3_1"></a>
+
+* Install (or copy) xml metarunners on your TeamCity admin page: https://[teamcity_server]/admin/editProject.html?projectId=_Root&tab=metaRunner (Administration - Root project - Meta-Runners)
+* Create new VCS from vspheretools project: https://github.com/devopshq/vspheretools
+* Attach new VCS to your TeamCity project and set up checkout rules: 
 +:.=>%default_devops_tools_path_local%/vspheretools
-* Создайте переменную default_devops_tools_path_local в вашем TeamCity-проекте и установите значение по умолчанию "devops-tools". Оно используется внутри метараннеров в виде %default_devops_tools_path_local%/vspheretools и указывает на каталог, внутри которого находится подкаталог с выкачанным через VCS репозиторием vspheretools.
+* Create variable default_devops_tools_path_local in your TeamCity project and set value, e.g. "devops-tools". It is local path for devops-tools repository.
 
 
 # Работа через API <a name="Chapter_4"></a>
