@@ -68,7 +68,6 @@ setup(
 
     packages=[
         '.',
-        'pysphere',
     ],
 
     setup_requires=[
