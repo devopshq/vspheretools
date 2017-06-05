@@ -5,7 +5,7 @@ branches:
   - master
   - develop
 install:
-  - pip install --upgrade --user travis pip setuptools wheel pytest coverage codacy-coverage
+  - pip install --upgrade travis pip setuptools wheel pytest coverage codacy-coverage
 script:
   - printenv
   - ls -la
