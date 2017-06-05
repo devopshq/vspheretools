@@ -139,7 +139,7 @@ class Sphere():
             LOGGER.error(traceback.format_exc())
             self.vSphereServerInstance = None
             self.vm = None
-            LOGGER.error('Can not connect to vSphere! server = {}, vm_name = {}'.format(VC_SERVER, VM_NAME))
+            LOGGER.error('Can not connect to vSphere! Maybe incorrect command? Show examples: vspheretools -h')
 
     def VMStatus(self):
         """

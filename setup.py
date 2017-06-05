@@ -56,7 +56,8 @@ setup(
     ],
 
     keywords=[
-        'vSphere',
+        'vsphere',
+        'sphere client',
         'client',
         'classificator',
         'utility',
