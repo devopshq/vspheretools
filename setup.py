@@ -68,7 +68,6 @@ setup(
     ],
 
     packages=[
-        '.',
     ],
 
     setup_requires=[
