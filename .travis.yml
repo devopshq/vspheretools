@@ -9,10 +9,6 @@ install:
 script:
   - printenv
   - ls -la
-  - coverage run -m py.test tests -v --debug
-  - cat pytestdebug.log
-  - coverage xml
-  - python-codacy-coverage -r coverage.xml
 deploy:
   provider: pypi
   user: devopshq
