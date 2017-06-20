@@ -5,10 +5,13 @@ branches:
   - master
   - develop
 install:
-  - pip install --upgrade travis pip setuptools wheel pytest coverage codacy-coverage
+  - pip install wheel pytest coverage codacy-coverage
 script:
   - printenv
   - ls -la
+  - coverage run -m py.test tests
+  - coverage xml
+  - python-codacy-coverage -r coverage.xml
 deploy:
   provider: pypi
   user: devopshq
