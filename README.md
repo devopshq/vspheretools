@@ -3,6 +3,8 @@
 [![vspheretools build status](https://travis-ci.org/devopshq/vspheretools.svg)](https://travis-ci.org/devopshq/vspheretools) [![vspheretools code quality](https://api.codacy.com/project/badge/Grade/185f7c8a13c84f88bf8b93280e457ffc)](https://www.codacy.com/app/tim55667757/vspheretools/dashboard) [![vspheretools code coverage](https://api.codacy.com/project/badge/Coverage/185f7c8a13c84f88bf8b93280e457ffc)](https://www.codacy.com/app/tim55667757/vspheretools/dashboard) [![vspheretools on PyPI](https://img.shields.io/pypi/v/vspheretools.svg)](https://pypi.python.org/pypi/vspheretools) [![vspheretools license](https://img.shields.io/pypi/l/vspheretools.svg)](https://github.com/devopshq/vspheretools/blob/master/LICENSE)
 
 
+***Russian README: https://github.com/devopshq/vspheretools/blob/master/README_RUS.md*** 
+
 ***Index:***
 - [Общие сведения](#Chapter_1)
     - [Требования к окружению](#Chapter_1_1)
