@@ -5,7 +5,7 @@ branches:
   - master
   - develop
 install:
-  - pip install wheel pytest coverage codacy-coverage
+  - pip install pytest coverage codacy-coverage
 script:
   - printenv
   - ls -la
@@ -17,7 +17,7 @@ deploy:
   user: devopshq
   password:
     secure: "KBNBXu5h38LnDbQkjr0+2FqpU27Y0cwNjtG0x44tnsxQQOgnidU5r3khjqe7cpiOAySlU0yOarSH1Py7IJiRK2XpdYgRz6ZdM29nq9uJvdyQ9jNNgWAoXMl2olWRe5I2IcAvTQ8Dc5j8EmWmds2GuPFrSh3HAVjZXv4yGkY4bXsXlp1SHPTzJUbHQBntKQJLBVV6/jgCAJ6drHQLKSIx4zWaxub3OmePPC0/y4R4Qj/O+sfGMTdOnrNnNkzjEhAo3sxHn1lWlwit4Is6m7J5dA5m7G6jNNDqVJ+r+2b+q575NXKbSqurRqkVHiw7BplkD4vcImRlSilfI83cHyKA2j5qprI6jFakkjyu79zOaa7HuDnWBPbdIpT69F0de9iRPtdlivEyfo0Kmtg0VGUaJkb52QMO5SkdU7XpVRKzSIDvyUFwN7igsUoe052yISILpOk3Y5qjZq+Fsx7XgeZmF8tLGTdsHJIHFLwFHrQbozF9SEMEtuRFzpAGxwavmvgRcCAuR7HPfQxywE0a9dZyF4odGg8QwoCNzwVl5qsQFagCJ9RjDngTf3bcHcwaV35tIHxdmXijkdY1+d2vP7hu+b0EnMELSOTiYcjsmgBK3Mn45WzOoq/gCJdZ1AKjRdDylmcDLo7ddKvTpAgeZux/2r3MQ6tMLGH4bHcJcsA9XYc="
-  distributions: bdist_wheel
+  distributions: sdist bdist_wheel
   on:
     all_branches: true
   skip_cleanup: true
