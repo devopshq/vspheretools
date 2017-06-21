@@ -214,7 +214,7 @@
 
 ## How to add vspheretools-metarunners <a name="Chapter_3_1"></a>
 
-* Install (or copy) xml metarunners on your TeamCity admin page: https://[teamcity_server]/admin/editProject.html?projectId=_Root&tab=metaRunner (Administration - Root project - Meta-Runners)
+* Install (or copy) xml metarunners from vspheretools-metarunners directory on your TeamCity admin page: https://[teamcity_server]/admin/editProject.html?projectId=_Root&tab=metaRunner (Administration - Root project - Meta-Runners)
 * Create new VCS from vspheretools project: https://github.com/devopshq/vspheretools
 * Attach new VCS to your TeamCity project and set up checkout rules: 
 +:.=>%default_devops_tools_path_local%/vspheretools
