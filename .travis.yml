@@ -2,7 +2,8 @@ language: python
 python: '2.7'
 branches:
   only:
-  - newdist
+  - master
+  - develop
 install:
   - pip install pytest coverage codacy-coverage
 script:
