@@ -26,7 +26,6 @@ else:
 
 print("vspheretools build version = {}".format(__version__))
 
-
 setup(
     name='vspheretools',
 
@@ -46,7 +45,7 @@ setup(
 
     download_url='https://github.com/devopshq/vspheretools.git',
 
-    entry_points={'console_scripts': ['vspheretools = VSphereTools:Main']},
+    entry_points={'console_scripts': ['vspheretools = vspheretools.VSphereTools:Main']},
 
     classifiers=[
         'Development Status :: {}'.format(devStatus),
@@ -71,7 +70,13 @@ setup(
     ],
 
     packages=[
-        '.',
+        'vspheretools',
+        'pysphere',
+        'pysphere.resources',
+        'pysphere.ZSI',
+        'pysphere.ZSI.generate',
+        'pysphere.ZSI.wstools',
+
     ],
 
     setup_requires=[
@@ -86,15 +91,8 @@ setup(
 
     package_data={
         '': [
-            './pysphere/*.py',
-            './pysphere/resources/*.py',
-            './pysphere/ZSI/*.py',
-            './pysphere/ZSI/LBNLCopyright',
-            './pysphere/ZSI/generate/*.py',
-            './pysphere/ZSI/wstools/*.py',
-
-            'VSphereTools.py',
-            'Logger.py',
+            './vspheretools-metarunners/*'
+            './tests/*'
 
             'LICENSE',
             'README.md',
