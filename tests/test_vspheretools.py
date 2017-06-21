@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-import VSphereTools
+from vspheretools import VSphereTools
 
 
 class TestVSphereTools():
