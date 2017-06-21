@@ -15,7 +15,7 @@ from datetime import datetime
 import time
 
 from pysphere import VIServer
-from Logger import *
+from vspheretools.Logger import *
 
 
 # ssl compatibilities:
