@@ -6,6 +6,7 @@ from setuptools import setup
 import os
 
 __version__ = '1.0'  # identify main version of vspheretools
+devStatus = '4 - Beta'  # default build status, see: https://pypi.python.org/pypi?%3Aaction=list_classifiers
 
 if 'TRAVIS_BUILD_NUMBER' in os.environ and 'TRAVIS_BRANCH' in os.environ:
     print("This is TRAVIS-CI build")
@@ -16,6 +17,8 @@ if 'TRAVIS_BUILD_NUMBER' in os.environ and 'TRAVIS_BRANCH' in os.environ:
         '' if 'release' in os.environ['TRAVIS_BRANCH'] or os.environ['TRAVIS_BRANCH'] == 'master' else 'dev',
         os.environ['TRAVIS_BUILD_NUMBER'],
     )
+
+    devStatus = '5 - Production/Stable' if 'release' in os.environ['TRAVIS_BRANCH'] or os.environ['TRAVIS_BRANCH'] == 'master' else devStatus
 
 else:
     print("This is local build")
@@ -46,7 +49,7 @@ setup(
     entry_points={'console_scripts': ['vspheretools = VSphereTools:Main']},
 
     classifiers=[
-        'Development Status :: 5 - Production/Stable',
+        'Development Status :: {}'.format(devStatus),
         'Environment :: Console',
         'Intended Audience :: System Administrators',
         'Topic :: Utilities',
