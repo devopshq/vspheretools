@@ -12,7 +12,6 @@ script:
   - coverage run -m py.test tests
   - coverage xml
   - python-codacy-coverage -r coverage.xml
-  - python setup.py install
 deploy:
   provider: pypi
   user: devopshq

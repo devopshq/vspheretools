@@ -86,8 +86,6 @@ setup(
 
     package_data={
         '': [
-            './tests/*.py',
-
             './pysphere/*.py',
             './pysphere/resources/*.py',
             './pysphere/ZSI/*.py',
