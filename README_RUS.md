@@ -47,7 +47,7 @@
 
 Использование (если вы не устанавливали инструмент через pip, а просто скачали и распаковали):
 
-    python VSphereTools.py [options] [command]
+    python -m vspheretools [options] [command]
 
 Либо, если инструмент установлен через pip, то просто наберите в консоли:
 
