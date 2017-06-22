@@ -96,6 +96,7 @@ setup(
 
             'LICENSE',
             'README.md',
+            'README_RUS.md',
         ],
     },
 
