@@ -22,7 +22,7 @@ if 'TRAVIS_BUILD_NUMBER' in os.environ and 'TRAVIS_BRANCH' in os.environ:
 
 else:
     print("This is local build")
-    __version__ += '.localbuild'  # set version as major.minor.localbuild if local build: python setup.py install
+    __version__ += '.dev0'  # set version as major.minor.localbuild if local build: python setup.py install
 
 print("vspheretools build version = {}".format(__version__))
 
