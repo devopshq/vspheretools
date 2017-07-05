@@ -135,7 +135,8 @@ class Sphere():
             self.vSphereServerInstance.connect(VC_SERVER, VC_LOGIN, VC_PASSWORD)  # Connect vSphere Client
             self.vmInstance = self.vSphereServerInstance.get_vm_by_name(VM_NAME)  # Get instance of virtual machine
 
-        except:
+        except Exception as e:
+            LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             self.vSphereServerInstance = None
             self.vm = None
