@@ -380,7 +380,6 @@ class Sphere():
         """
         Read VM property and return ip-adress.
         """
-        ip = None
         try:
             ip = None
             startTime = datetime.now()
@@ -398,7 +397,6 @@ class Sphere():
                 LOGGER.info('Virtual machine "{}" has no ip-adress.'.format(VM_NAME))
 
         except Exception as e:
-            ip = '0.0.0.0'
             LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             LOGGER.error('Can not set up ip-address of virtual machine "{}" into TeamCity!'.format(VM_NAME))
