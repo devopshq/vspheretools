@@ -146,9 +146,9 @@ class Sphere():
         """
         Get status of virtual machine.
         """
-        status = None
         try:
             status = self.vmInstance.get_status()
+            LOGGER.info('Current status of virtual machine "{}": {}'.format(VM_NAME, status))
 
         except Exception as e:
             status = None
@@ -156,9 +156,7 @@ class Sphere():
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while getting status of virtual machine "{}"!'.format(VM_NAME))
 
-        finally:
-            LOGGER.info('Current status of virtual machine "{}": {}'.format(VM_NAME, status))
-            return status
+        return status
 
     def VMStart(self):
         """
@@ -167,6 +165,7 @@ class Sphere():
         status = None
         try:
             status = self.VMStatus()
+
             if status == 'POWERED OFF':
                 LOGGER.debug('Trying to start VM...')
                 self.vmInstance.power_on()
@@ -181,16 +180,15 @@ class Sphere():
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while starting virtual machine "{}"!'.format(VM_NAME))
 
-        finally:
-            return status
+        return status
 
     def VMStartWait(self):
         """
         Starting virtual machine and wait while guest OS started.
         """
-        status = None
         try:
             status = self.VMStatus()
+
             if status == 'POWERED OFF':
                 LOGGER.debug('Trying to start VM...')
                 self.vmInstance.power_on()
@@ -208,16 +206,15 @@ class Sphere():
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while starting virtual machine "{}" and waiting for guest OS start!'.format(VM_NAME))
 
-        finally:
-            return status
+        return status
 
     def VMStop(self):
         """
         Stopping virtual machine.
         """
-        status = None
         try:
             status = self.VMStatus()
+
             if status == 'POWERED ON':
                 LOGGER.debug('Trying to stop VM...')
                 self.vmInstance.power_off()
@@ -232,22 +229,20 @@ class Sphere():
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while stopping virtual machine "{}"!'.format(VM_NAME))
 
-        finally:
-            return status
+        return status
 
     def GetVMProperties(self):
         """
         Read all VM properties and return dictionary.
         """
-        properties = {}
         try:
             properties = self.vmInstance.get_properties(from_cache=False)
-
             LOGGER.info('All properties of virtual machine "{}":'.format(VM_NAME))
+
             for key in properties.keys():
                 if isinstance(properties[key], dict):
-
                     LOGGER.info('    {}:'.format(key))
+
                     for subKey in properties[key].keys():
                         if isinstance(properties[key], dict):
 
@@ -266,14 +261,12 @@ class Sphere():
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while getting properties of virtual machine "{}"!'.format(VM_NAME))
 
-        finally:
-            return properties
+        return properties
 
     def GetVMSnapshotsList(self):
         """
         Read and return list of all VM snapshots.
         """
-        snapshots = []
         try:
             current = self.vmInstance.get_current_snapshot_name()
             snapshots = self.vmInstance.get_snapshots()
@@ -293,8 +286,7 @@ class Sphere():
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while getting list of snapshots of virtual machine "{}"!'.format(VM_NAME))
 
-        finally:
-            return snapshots
+        return snapshots
 
     def CreateVMSnapshot(self, **kwargs):
         """
@@ -376,8 +368,7 @@ class Sphere():
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while creating snapshots of virtual machine "{}"!'.format(VM_NAME))
 
-        finally:
-            return statusCode
+        return statusCode
 
     def GetVMIPaddress(self):
         """
@@ -405,8 +396,7 @@ class Sphere():
             LOGGER.error(traceback.format_exc())
             LOGGER.error('Can not set up ip-address of virtual machine "{}" into TeamCity!'.format(VM_NAME))
 
-        finally:
-            return ip
+        return ip
 
     def SetVMIPaddressIntoTeamCityParameter(self, paramName):
         """
@@ -445,8 +435,7 @@ class Sphere():
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while revert virtual machine "{}" into current snapshot!'.format(VM_NAME))
 
-        finally:
-            return statusCode
+        return statusCode
 
     def VMRevertToSnapshot(self, snapshotName=None):
         """
@@ -472,8 +461,7 @@ class Sphere():
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while revert virtual machine "{}" into snapshot "{}"!'.format(VM_NAME, snapshotName))
 
-        finally:
-            return statusCode
+        return statusCode
 
     def CloneVM(self, cloneName=None):
         """
@@ -681,8 +669,7 @@ class Sphere():
             LOGGER.error(traceback.format_exc())
             statusCode = -1
 
-        finally:
-            return statusCode
+        return statusCode
 
     def ExecuteProgramOnVM(self, **kwargs):
         """
