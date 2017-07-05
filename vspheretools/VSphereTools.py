@@ -150,8 +150,9 @@ class Sphere():
         try:
             status = self.vmInstance.get_status()
 
-        except:
+        except Exception as e:
             status = None
+            LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while getting status of virtual machine "{}"!'.format(VM_NAME))
 
