@@ -48,7 +48,7 @@ class VIApiException(VIException):
         except:
             fault = 'Undefined'
 
-        super(self.__class__, self).__init__(message, fault)
+        super().__init__(message, fault)
 
 
 class UnsupportedPerfIntervalError(VIException):
