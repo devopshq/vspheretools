@@ -39,8 +39,8 @@ class VIApiException(VIException):
         try:
             message = e.fault.args[1]
 
-        except:
-            message = str(e)
+        except Exception as eX:
+            message = str(eX)
 
         try:
             fault = e.fault.detail[0].typecode.pname
