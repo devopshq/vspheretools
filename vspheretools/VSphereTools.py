@@ -175,8 +175,9 @@ class Sphere():
             else:
                 LOGGER.warning('Virtual machine "{}" powered on already!'.format(VM_NAME))
 
-        except:
+        except Exception as e:
             status = None
+            LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while starting virtual machine "{}"!'.format(VM_NAME))
 
@@ -201,8 +202,9 @@ class Sphere():
             else:
                 LOGGER.warning('Virtual machine "{}" powered on already!'.format(VM_NAME))
 
-        except:
+        except Exception as e:
             status = None
+            LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while starting virtual machine "{}" and waiting for guest OS start!'.format(VM_NAME))
 
@@ -224,8 +226,9 @@ class Sphere():
             else:
                 LOGGER.warning('Virtual machine "{}" powered off already!'.format(VM_NAME))
 
-        except:
+        except Exception as e:
             status = None
+            LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while stopping virtual machine "{}"!'.format(VM_NAME))
 
@@ -256,8 +259,9 @@ class Sphere():
                 else:
                     LOGGER.info('    {}: {}'.format(key, properties[key]))
 
-        except:
+        except Exception as e:
             properties = None
+            LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while getting properties of virtual machine "{}"!'.format(VM_NAME))
 
@@ -281,8 +285,9 @@ class Sphere():
             else:
                 LOGGER.warning('No snapshots found for virtual machine "{}"!'.format(VM_NAME))
 
-        except:
+        except Exception as e:
             snapshots = None
+            LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while getting list of snapshots of virtual machine "{}"!'.format(VM_NAME))
 
@@ -363,8 +368,9 @@ class Sphere():
                 LOGGER.warning('To do nothing because snapshot already exist and not rewrite and not fail enabled.')
                 statusCode = 0
 
-        except:
+        except Exception as e:
             statusCode = -1
+            LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while creating snapshots of virtual machine "{}"!'.format(VM_NAME))
 
@@ -391,8 +397,9 @@ class Sphere():
             else:
                 LOGGER.info('Virtual machine "{}" has no ip-adress.'.format(VM_NAME))
 
-        except:
+        except Exception as e:
             ip = '0.0.0.0'
+            LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             LOGGER.error('Can not set up ip-address of virtual machine "{}" into TeamCity!'.format(VM_NAME))
 
@@ -429,9 +436,9 @@ class Sphere():
 
             self.VMStatus()
 
-        except:
+        except Exception as e:
             statusCode = -1
-
+            LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while revert virtual machine "{}" into current snapshot!'.format(VM_NAME))
 
@@ -455,9 +462,9 @@ class Sphere():
             else:
                 statusCode = self.VMRevertToCurrentSnapshot()
 
-        except:
+        except Exception as e:
             statusCode = -2
-
+            LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while revert virtual machine "{}" into snapshot "{}"!'.format(VM_NAME, snapshotName))
 
@@ -475,7 +482,8 @@ class Sphere():
                     LOGGER.debug('Name already used: {}'.format(cloneName))
                     cloneName = None
 
-                except:
+                except Exception as e:
+                    LOGGER.debug(e)
                     LOGGER.debug('Name not used: {}'.format(cloneName))
 
             i = 1
@@ -487,7 +495,8 @@ class Sphere():
                     cloneName = None
                     i += 1
 
-                except:
+                except Exception as e:
+                    LOGGER.debug(e)
                     LOGGER.debug('Name not used: {}'.format(cloneName))
 
             LOGGER.debug('Cloning in progress...')
@@ -495,7 +504,8 @@ class Sphere():
 
             LOGGER.info('Virtual machine "{}" successful clone into directory "{}" with new name "{}".'.format(VM_NAME, VM_CLONES_DIR, cloneName))
 
-        except:
+        except Exception as e:
+            LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while cloning virtual machine "{}" into directory "{}"!'.format(VM_NAME, VM_CLONES_DIR))
 
@@ -523,7 +533,8 @@ class Sphere():
                 else:
                     LOGGER.warning('Virtual machine "{}" NOT delete with message: "{}".'.format(VM_NAME, msg))
 
-            except:
+            except Exception as e:
+                LOGGER.debug(e)
                 LOGGER.error(traceback.format_exc())
                 LOGGER.error('An error occured while deleting virtual machine "{}"!'.format(VM_NAME))
 
@@ -546,7 +557,8 @@ class Sphere():
 
                 LOGGER.info('File "{}" on guest OS successful copied as file "{}".'.format(srcFile, dstFile))
 
-            except:
+            except Exception as e:
+                LOGGER.debug(e)
                 LOGGER.error(traceback.format_exc())
                 LOGGER.error('An error occured while copying file "{}" into destination file "{}" inside virtual machine "{}"!'.format(srcFile, dstFile, VM_NAME))
 
@@ -572,7 +584,8 @@ class Sphere():
 
                 LOGGER.info('File "{}" successful copied from VM guest OS as local file "{}".'.format(srcFile, dstFile))
 
-            except:
+            except Exception as e:
+                LOGGER.debug(e)
                 LOGGER.error(traceback.format_exc())
                 LOGGER.error('An error occured while copying file "{}" from virtual machine "{}" into destination file "{}"!'.format(srcFile, VM_NAME, dstFile))
 
@@ -598,8 +611,10 @@ class Sphere():
 
                 LOGGER.info('Directory "{}" on guest OS successful created.'.format(dirPath))
 
-            except:
+            except Exception as e:
+                LOGGER.debug(e)
                 trace = traceback.format_exc()
+
                 if 'FileAlreadyExistsFault' not in trace:
                     LOGGER.error(traceback.format_exc())
                     LOGGER.error('An error occured while directory "{}" created inside virtual machine "{}"!'.format(dirPath, VM_NAME))
@@ -664,7 +679,8 @@ class Sphere():
                             for line in output:
                                     LOGGER.debug('    {}'.format(line.strip()))
 
-        except:
+        except Exception as e:
+            LOGGER.debug(e)
             LOGGER.error('Unknown exception occurred while process executing!')
             LOGGER.error(traceback.format_exc())
             statusCode = -1
@@ -795,8 +811,9 @@ finally:
 
                         returnCode = self.MonitoringProcessOnVM(pid, remoteLogFile)
 
-                except:
+                except Exception as e:
                     returnCode = -1
+                    LOGGER.debug(e)
                     LOGGER.error(traceback.format_exc())
                     LOGGER.error('An error occured while executing command inside virtual machine!')
 
