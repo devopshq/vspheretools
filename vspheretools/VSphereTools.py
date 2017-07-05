@@ -822,7 +822,7 @@ finally:
 
 def Main():
     """
-    Main entry point. 
+    Main entry point.
     """
     global VC_SERVER
     global VC_LOGIN
