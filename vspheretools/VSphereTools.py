@@ -164,7 +164,6 @@ class Sphere():
         """
         Starting virtual machine.
         """
-        status = None
         try:
             status = self.VMStatus()
 
