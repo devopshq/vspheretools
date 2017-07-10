@@ -382,8 +382,9 @@ class Sphere():
         """
         Read VM property and return ip-adress.
         """
+        ip = None
+
         try:
-            ip = None
             startTime = datetime.now()
 
             while not ip and (datetime.now() - startTime).seconds <= OP_TIMEOUT:
