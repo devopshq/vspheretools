@@ -391,7 +391,7 @@ class Sphere():
                 LOGGER.debug('Trying to get ip-address (timeout = {})...'.format(OP_TIMEOUT))
                 properties = self.vmInstance.get_properties(from_cache=False)
                 ip = None if 'ip_address' not in properties.keys() else properties['ip_address']
-                time.sleep(5)
+                time.sleep(1)
 
             if ip:
                 LOGGER.info('Virtual machine "{}" has ip-address: {}'.format(VM_NAME, ip))
