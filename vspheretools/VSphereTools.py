@@ -131,6 +131,8 @@ class Sphere():
 
     def __init__(self):
         try:
+            LOGGER.info('vSphereTools version used: {}'.format(__version__))
+            LOGGER.debug('vSphereTools Sphere() class initializing...')
             self.vSphereServerInstance = VIServer()  # Initialize main vSphere Server
             self.vSphereServerInstance.connect(VC_SERVER, VC_LOGIN, VC_PASSWORD)  # Connect vSphere Client
             self.vmInstance = self.vSphereServerInstance.get_vm_by_name(VM_NAME)  # Get instance of virtual machine
