@@ -394,10 +394,10 @@ class Sphere():
                 time.sleep(5)
 
             if ip:
-                LOGGER.info('Virtual machine "{}" has ip-adress: {}'.format(VM_NAME, ip))
+                LOGGER.info('Virtual machine "{}" has ip-address: {}'.format(VM_NAME, ip))
 
             else:
-                LOGGER.info('Virtual machine "{}" has no ip-adress.'.format(VM_NAME))
+                LOGGER.info('Virtual machine "{}" has no ip-address.'.format(VM_NAME))
 
         except Exception as e:
             LOGGER.debug(e)
