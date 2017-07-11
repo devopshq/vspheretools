@@ -4,17 +4,10 @@
 
 
 # This module realize some functions for work with vSphere and virtual machines.
-# Home wiki-page: https://github.com/devopshq/vspheretools/wiki/vSphereTools-Instruction-(ru)
+# Home wiki-page: http://devopshq.github.io/vspheretools/
 
 
 import os
-import sys
-
-# ssl compatibilities:
-if sys.platform is not 'win32':
-    if sys.version_info >= (2, 7, 9):
-        import ssl
-        ssl._create_default_https_context = ssl._create_unverified_context
 
 import argparse
 import traceback
@@ -22,18 +15,51 @@ from datetime import datetime
 import time
 
 from pysphere import VIServer
-from Logger import *
+from vspheretools.Logger import *
 
 
+# ssl compatibilities:
+if sys.platform is not 'win32':
+    if sys.version_info >= (2, 7, 9):
+        import ssl
+        ssl._create_default_https_context = ssl._create_unverified_context
+
+
+def Version(onlyPrint=False):
+    """
+    Return current version of FuzzyClassificator build
+    """
+    import pkg_resources  # part of standart setuptools
+
+    try:
+        version = pkg_resources.get_distribution('vspheretools').version
+
+    except Exception:
+        if onlyPrint:
+            LOGGER.setLevel(logging.CRITICAL)
+            print('unknown')
+
+        return 'unknown'
+
+    if onlyPrint:
+        LOGGER.setLevel(logging.CRITICAL)
+        print(version)
+
+    return version
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 # Global variables:
 VC_SERVER = r""  # e.g. vcenter-01.example.com
-VC_LOGIN = r""
-VC_PASSWORD = r""
-VM_NAME = r""
-VM_GUEST_LOGIN = r""
-VM_GUEST_PASSWORD = r""
-VM_CLONES_DIR = "Clones"  # dir for cloning vm
+VC_LOGIN = r""  # login to Sphere
+VC_PASSWORD = r""  # password to Sphere
+VM_NAME = r""  # name of virtual machine
+VM_GUEST_LOGIN = r""  # login to VM guest OS
+VM_GUEST_PASSWORD = r""  # password to VM guest
+VM_CLONES_DIR = "Clones"  # directory for cloning vm
 OP_TIMEOUT = 300  # operations timeout in seconds
+__version__ = Version()  # set version of current vSphereTools build
+# ----------------------------------------------------------------------------------------------------------------------
 
 
 def ParseArgsMain():
@@ -42,8 +68,11 @@ def ParseArgsMain():
     """
     parser = argparse.ArgumentParser()  # command-line string parser
 
-    parser.description = 'This program realize some helper functions for work with vSphere and virtual machines.'
-    parser.epilog = 'PySphereRoutine using Python 2*'
+    parser.description = 'vSphereTools version: {}. vSphereTools is a set of scripts from DevOpsHQ to support working with vSphere and virtual machines (VMs) on it, which are based on the pysphere library.'.format(__version__)
+    parser.epilog = 'See examples on GitHub: http://devopshq.github.io/vspheretools/'
+    parser.usage = 'vspheretools [options] [command]'
+
+    parser.add_argument('-v', '--version', action='store_true', help='Show current version of vSphereTools.')
 
     # --- server options:
     parser.add_argument('-s', '--server', type=str, help='main vSphere Server Cluster, e.g. vcenter-01.example.com.')
@@ -81,7 +110,7 @@ def ParseArgsMain():
     parser.add_argument('--download-file', type=str, nargs='+', help='Download file from virtual machine with True to overwrite local file. Example: --download-file srcFile dstFile True')
 
     parser.add_argument('--mkdir', type=str, nargs='+', help='Creating directory and all sub-directory in given path with True to create sub-dirs. Example: --mkdir dir_path True')
-    parser.add_argument('--execute', type=str, nargs='+', help='Execute program on guest OS with parameters. Example: --execute program="C:\Windows\System32\cmd.exe" args="/T:Green /C echo %aaa% & echo %bbb%" env="aaa:10, bbb:20" cwd="C:\Windows\System32" pythonbin="c:\python27\python.exe" wait=True')
+    parser.add_argument('--execute', type=str, nargs='+', help=r'Execute program on guest OS with parameters. Example: --execute program="C:\Windows\System32\cmd.exe" args="/T:Green /C echo %%aaa%% & echo %%bbb%%" env="aaa:10, bbb:20" cwd="C:\Windows\System32" pythonbin="c:\python27\python.exe" wait=True')
 
     parser.add_argument('--not-skip-run', type=str, help='This is parameter for TeamCity support. Scripts executed if "TRUE". Scripts skipped if "FALSE". Otherwise exception raised.')
 
@@ -102,40 +131,42 @@ class Sphere():
 
     def __init__(self):
         try:
+            LOGGER.info('vSphereTools version used: {}'.format(__version__))
+            LOGGER.debug('vSphereTools Sphere() class initializing...')
             self.vSphereServerInstance = VIServer()  # Initialize main vSphere Server
             self.vSphereServerInstance.connect(VC_SERVER, VC_LOGIN, VC_PASSWORD)  # Connect vSphere Client
             self.vmInstance = self.vSphereServerInstance.get_vm_by_name(VM_NAME)  # Get instance of virtual machine
 
-        except:
+        except Exception as e:
+            LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             self.vSphereServerInstance = None
             self.vm = None
-            LOGGER.error('Can not connect to vSphere! server = {}, vm_name = {}'.format(VC_SERVER, VM_NAME))
+            LOGGER.error('Can not connect to vSphere! Maybe incorrect command? Show examples: vspheretools -h')
 
     def VMStatus(self):
         """
         Get status of virtual machine.
         """
-        status = None
         try:
             status = self.vmInstance.get_status()
+            LOGGER.info('Current status of virtual machine "{}": {}'.format(VM_NAME, status))
 
-        except:
+        except Exception as e:
             status = None
+            LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while getting status of virtual machine "{}"!'.format(VM_NAME))
 
-        finally:
-            LOGGER.info('Current status of virtual machine "{}": {}'.format(VM_NAME, status))
-            return status
+        return status
 
     def VMStart(self):
         """
         Starting virtual machine.
         """
-        status = None
         try:
             status = self.VMStatus()
+
             if status == 'POWERED OFF':
                 LOGGER.debug('Trying to start VM...')
                 self.vmInstance.power_on()
@@ -145,21 +176,21 @@ class Sphere():
             else:
                 LOGGER.warning('Virtual machine "{}" powered on already!'.format(VM_NAME))
 
-        except:
+        except Exception as e:
             status = None
+            LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while starting virtual machine "{}"!'.format(VM_NAME))
 
-        finally:
-            return status
+        return status
 
     def VMStartWait(self):
         """
         Starting virtual machine and wait while guest OS started.
         """
-        status = None
         try:
             status = self.VMStatus()
+
             if status == 'POWERED OFF':
                 LOGGER.debug('Trying to start VM...')
                 self.vmInstance.power_on()
@@ -172,21 +203,21 @@ class Sphere():
             else:
                 LOGGER.warning('Virtual machine "{}" powered on already!'.format(VM_NAME))
 
-        except:
+        except Exception as e:
             status = None
+            LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while starting virtual machine "{}" and waiting for guest OS start!'.format(VM_NAME))
 
-        finally:
-            return status
+        return status
 
     def VMStop(self):
         """
         Stopping virtual machine.
         """
-        status = None
         try:
             status = self.VMStatus()
+
             if status == 'POWERED ON':
                 LOGGER.debug('Trying to stop VM...')
                 self.vmInstance.power_off()
@@ -196,27 +227,26 @@ class Sphere():
             else:
                 LOGGER.warning('Virtual machine "{}" powered off already!'.format(VM_NAME))
 
-        except:
+        except Exception as e:
             status = None
+            LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while stopping virtual machine "{}"!'.format(VM_NAME))
 
-        finally:
-            return status
+        return status
 
     def GetVMProperties(self):
         """
         Read all VM properties and return dictionary.
         """
-        properties = {}
         try:
             properties = self.vmInstance.get_properties(from_cache=False)
-
             LOGGER.info('All properties of virtual machine "{}":'.format(VM_NAME))
+
             for key in properties.keys():
                 if isinstance(properties[key], dict):
-
                     LOGGER.info('    {}:'.format(key))
+
                     for subKey in properties[key].keys():
                         if isinstance(properties[key], dict):
 
@@ -230,20 +260,18 @@ class Sphere():
                 else:
                     LOGGER.info('    {}: {}'.format(key, properties[key]))
 
-        except:
+        except Exception as e:
             properties = None
+            LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while getting properties of virtual machine "{}"!'.format(VM_NAME))
 
-        finally:
-            return properties
+        return properties
 
     def GetVMSnapshotsList(self):
         """
         Read and return list of all VM snapshots.
         """
-        current = None
-        snapshots = []
         try:
             current = self.vmInstance.get_current_snapshot_name()
             snapshots = self.vmInstance.get_snapshots()
@@ -258,13 +286,13 @@ class Sphere():
             else:
                 LOGGER.warning('No snapshots found for virtual machine "{}"!'.format(VM_NAME))
 
-        except:
+        except Exception as e:
             snapshots = None
+            LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while getting list of snapshots of virtual machine "{}"!'.format(VM_NAME))
 
-        finally:
-            return snapshots
+        return snapshots
 
     def CreateVMSnapshot(self, **kwargs):
         """
@@ -341,42 +369,41 @@ class Sphere():
                 LOGGER.warning('To do nothing because snapshot already exist and not rewrite and not fail enabled.')
                 statusCode = 0
 
-        except:
+        except Exception as e:
             statusCode = -1
+            LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while creating snapshots of virtual machine "{}"!'.format(VM_NAME))
 
-        finally:
-            return statusCode
+        return statusCode
 
     def GetVMIPaddress(self):
         """
         Read VM property and return ip-adress.
         """
         ip = None
+
         try:
-            ip = None
             startTime = datetime.now()
 
             while not ip and (datetime.now() - startTime).seconds <= OP_TIMEOUT:
                 LOGGER.debug('Trying to get ip-address (timeout = {})...'.format(OP_TIMEOUT))
                 properties = self.vmInstance.get_properties(from_cache=False)
                 ip = None if 'ip_address' not in properties.keys() else properties['ip_address']
-                time.sleep(5)
+                time.sleep(1)
 
             if ip:
-                LOGGER.info('Virtual machine "{}" has ip-adress: {}'.format(VM_NAME, ip))
+                LOGGER.info('Virtual machine "{}" has ip-address: {}'.format(VM_NAME, ip))
 
             else:
-                LOGGER.info('Virtual machine "{}" has no ip-adress.'.format(VM_NAME))
+                LOGGER.info('Virtual machine "{}" has no ip-address.'.format(VM_NAME))
 
-        except:
-            ip = '0.0.0.0'
+        except Exception as e:
+            LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             LOGGER.error('Can not set up ip-address of virtual machine "{}" into TeamCity!'.format(VM_NAME))
 
-        finally:
-            return ip
+        return ip
 
     def SetVMIPaddressIntoTeamCityParameter(self, paramName):
         """
@@ -409,14 +436,13 @@ class Sphere():
 
             self.VMStatus()
 
-        except:
+        except Exception as e:
             statusCode = -1
-
+            LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while revert virtual machine "{}" into current snapshot!'.format(VM_NAME))
 
-        finally:
-            return statusCode
+        return statusCode
 
     def VMRevertToSnapshot(self, snapshotName=None):
         """
@@ -436,14 +462,13 @@ class Sphere():
             else:
                 statusCode = self.VMRevertToCurrentSnapshot()
 
-        except:
+        except Exception as e:
             statusCode = -2
-
+            LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while revert virtual machine "{}" into snapshot "{}"!'.format(VM_NAME, snapshotName))
 
-        finally:
-            return statusCode
+        return statusCode
 
     def CloneVM(self, cloneName=None):
         """
@@ -457,7 +482,8 @@ class Sphere():
                     LOGGER.debug('Name already used: {}'.format(cloneName))
                     cloneName = None
 
-                except:
+                except Exception as e:
+                    LOGGER.debug(e)
                     LOGGER.debug('Name not used: {}'.format(cloneName))
 
             i = 1
@@ -469,7 +495,8 @@ class Sphere():
                     cloneName = None
                     i += 1
 
-                except:
+                except Exception as e:
+                    LOGGER.debug(e)
                     LOGGER.debug('Name not used: {}'.format(cloneName))
 
             LOGGER.debug('Cloning in progress...')
@@ -477,7 +504,8 @@ class Sphere():
 
             LOGGER.info('Virtual machine "{}" successful clone into directory "{}" with new name "{}".'.format(VM_NAME, VM_CLONES_DIR, cloneName))
 
-        except:
+        except Exception as e:
+            LOGGER.debug(e)
             LOGGER.error(traceback.format_exc())
             LOGGER.error('An error occured while cloning virtual machine "{}" into directory "{}"!'.format(VM_NAME, VM_CLONES_DIR))
 
@@ -505,7 +533,8 @@ class Sphere():
                 else:
                     LOGGER.warning('Virtual machine "{}" NOT delete with message: "{}".'.format(VM_NAME, msg))
 
-            except:
+            except Exception as e:
+                LOGGER.debug(e)
                 LOGGER.error(traceback.format_exc())
                 LOGGER.error('An error occured while deleting virtual machine "{}"!'.format(VM_NAME))
 
@@ -528,7 +557,8 @@ class Sphere():
 
                 LOGGER.info('File "{}" on guest OS successful copied as file "{}".'.format(srcFile, dstFile))
 
-            except:
+            except Exception as e:
+                LOGGER.debug(e)
                 LOGGER.error(traceback.format_exc())
                 LOGGER.error('An error occured while copying file "{}" into destination file "{}" inside virtual machine "{}"!'.format(srcFile, dstFile, VM_NAME))
 
@@ -554,7 +584,8 @@ class Sphere():
 
                 LOGGER.info('File "{}" successful copied from VM guest OS as local file "{}".'.format(srcFile, dstFile))
 
-            except:
+            except Exception as e:
+                LOGGER.debug(e)
                 LOGGER.error(traceback.format_exc())
                 LOGGER.error('An error occured while copying file "{}" from virtual machine "{}" into destination file "{}"!'.format(srcFile, VM_NAME, dstFile))
 
@@ -580,9 +611,11 @@ class Sphere():
 
                 LOGGER.info('Directory "{}" on guest OS successful created.'.format(dirPath))
 
-            except:
+            except Exception as e:
+                LOGGER.debug(e)
                 trace = traceback.format_exc()
-                if not 'FileAlreadyExistsFault' in trace:
+
+                if 'FileAlreadyExistsFault' not in trace:
                     LOGGER.error(traceback.format_exc())
                     LOGGER.error('An error occured while directory "{}" created inside virtual machine "{}"!'.format(dirPath, VM_NAME))
 
@@ -646,13 +679,13 @@ class Sphere():
                             for line in output:
                                     LOGGER.debug('    {}'.format(line.strip()))
 
-        except:
+        except Exception as e:
+            LOGGER.debug(e)
             LOGGER.error('Unknown exception occurred while process executing!')
             LOGGER.error(traceback.format_exc())
             statusCode = -1
 
-        finally:
-            return statusCode
+        return statusCode
 
     def ExecuteProgramOnVM(self, **kwargs):
         """
@@ -660,8 +693,8 @@ class Sphere():
             program - string path to executable file, e.g. r"C:\Windows\System32\cmd.exe",
             args - comma-separated strings with arguments to the program, e.g. r"/T:Green /C echo %aaa% & echo %bbb%",
             env - comma-separated strings with environment variables, e.g. r"aaa:10, bbb:20",
-            cwd - string path to working directory, e.g. r"C:\Windows\System32\",
-            pythonbin - path to python binary on VM,
+            cwd - string path to working directory, e.g. r'C:\Windows\System32\',
+            pythonbin - path to python binary on VM, e.g. r'/python32/python'
             wait - wait for process end and then return stderr, stdout and exit code.
         """
         returnCode = 0  # process return code
@@ -705,7 +738,12 @@ class Sphere():
             remoteLogFile = os.path.join(os.path.dirname(program[0]), 'vm_process.log')  # log file on VM
             remoteScriptFile = os.path.join(os.path.dirname(program[0]), os.path.basename(scriptFile))  # wrapper on VM
 
-            script = r"""# This is script wrapper using for run user-command on VM.
+            script = r"""# -*- coding: utf-8 -*-
+#
+# Author: Timur Gilmullin, tim55667757@gmail.com
+# This is script wrapper using for run user-command on VM side.
+
+
 import os, sys, subprocess, traceback
 
 returnCode = 0
@@ -773,8 +811,9 @@ finally:
 
                         returnCode = self.MonitoringProcessOnVM(pid, remoteLogFile)
 
-                except:
+                except Exception as e:
                     returnCode = -1
+                    LOGGER.debug(e)
                     LOGGER.error(traceback.format_exc())
                     LOGGER.error('An error occured while executing command inside virtual machine!')
 
@@ -787,8 +826,24 @@ finally:
         return returnCode
 
 
-if __name__ == "__main__":
+def Main():
+    """
+    Main entry point.
+    """
+    global VC_SERVER
+    global VC_LOGIN
+    global VC_PASSWORD
+    global VM_NAME
+    global VM_GUEST_LOGIN
+    global VM_GUEST_PASSWORD
+    global VM_CLONES_DIR
+    global OP_TIMEOUT
+
     args = ParseArgsMain()  # get and parse command-line parameters
+
+    if args.version:
+        Version(onlyPrint=True)  # Show current version of vSphereTools
+        sys.exit(0)
 
     if args.not_skip_run:
         if args.not_skip_run == "TRUE":
@@ -938,3 +993,7 @@ if __name__ == "__main__":
             LOGGER.warning('Please, select command!')
 
     sys.exit(exitCode)
+
+
+if __name__ == "__main__":
+    Main()

@@ -1,4 +1,3 @@
-#--
 # Copyright (c) 2012, Sebastian Tello
 # All rights reserved.
 
@@ -24,13 +23,12 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-#--
+
 
 from pysphere.resources import VimService_services as VI
 from pysphere.vi_task import VITask
-from pysphere.resources.vi_exception import VIException, VIApiException, \
-                                            FaultTypes
+from pysphere.resources.vi_exception import VIException, VIApiException, FaultTypes
+
 
 class VIManagedEntity(object):
 
@@ -69,7 +67,7 @@ class VIManagedEntity(object):
 
             return vi_task
 
-        except (VI.ZSI.FaultException), e:
+        except VI.ZSI.FaultException as e:
             raise VIApiException(e)
         
     def reload(self):
@@ -90,7 +88,8 @@ class VIManagedEntity(object):
             _this.set_attribute_type(self._mor.get_attribute_type())
             request.set_element__this(_this)
             self._server._proxy.Reload(request)
-        except (VI.ZSI.FaultException), e:
+
+        except VI.ZSI.FaultException as e:
             raise VIApiException(e)
         
     def destroy(self, sync_run=True):
@@ -106,7 +105,6 @@ class VIManagedEntity(object):
             _this = request.new__this(self._mor)
             _this.set_attribute_type(self._mor.get_attribute_type())
             request.set_element__this(_this)
-            
 
             task = self._server._proxy.Destroy_Task(request)._returnval
             vi_task = VITask(task, self._server)
@@ -119,5 +117,6 @@ class VIManagedEntity(object):
                 return
 
             return vi_task
-        except (VI.ZSI.FaultException), e:
+
+        except VI.ZSI.FaultException as e:
             raise VIApiException(e)
