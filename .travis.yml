@@ -7,11 +7,13 @@ branches:
 install:
   - pip install pytest coverage codacy-coverage
 script:
+  - set -e
   - printenv
   - ls -la
   - coverage run -m py.test tests
   - coverage xml
   - python-codacy-coverage -r coverage.xml
+  - set +e
 deploy:
   provider: pypi
   user: devopshq
